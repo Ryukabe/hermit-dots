@@ -19,6 +19,7 @@ config/zsh/plugins/
 # dependencies and generated files (AGS)
 node_modules/
 @girs/
+config/ags/widgets/polkit/polkit-agent-helper
 
 # keys and backups
 *.pem
