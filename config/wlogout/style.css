@@ -1,0 +1,72 @@
+@import 'colors/colors.css';
+
+window {
+    font-family: SF Pro Display;
+    font-size: 0px;
+    color:  @fg; /* text */
+    background-color: alpha(@bg0, .5); 
+    border-color: @accent;
+} 
+
+button {
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 25%;
+    background-color: transparent;
+    animation: gradient_f 10s ease-in infinite;
+    transition: all 0.3s ease-in;
+    box-shadow: 0 0 10px 2px transparent;
+    border-radius: 20px;
+    border-color: transparent;
+    margin: 10px;
+}
+
+button:focus {
+    box-shadow: none;
+    background-size : 25%;
+}
+
+button:hover {
+    background-size: 50%;
+    background-color: @accent;
+    border-color: transparent;
+    border-radius: 20px;
+    color: transparent;
+    transition: all 0.3s cubic-bezier(.55, 0.0, .28, 1.682), box-shadow 0.5s ease-in;
+}
+
+#shutdown {
+    background-image: image(url("./icons/power.png"));
+}
+#shutdown:hover {
+  background-image: image(url("./icons/power-hover.png"));
+}
+
+#logout {
+    background-image: image(url("./icons/logout.png"));
+
+}
+#logout:hover {
+  background-image: image(url("./icons/logout-hover.png"));
+}
+
+#reboot {
+    background-image: image(url("./icons/restart.png"));
+}
+#reboot:hover {
+  background-image: image(url("./icons/restart-hover.png"));
+}
+
+#lock {
+    background-image: image(url("./icons/lock.png"));
+}
+#lock:hover {
+  background-image: image(url("./icons/lock-hover.png"));
+}
+
+#hibernate {
+    background-image: image(url("./icons/hibernate.png"));
+}
+#hibernate:hover {
+  background-image: image(url("./icons/hibernate-hover.png"));
+}

@@ -1,0 +1,21 @@
+/* rxyhn — GTK / CSS @define-color */
+
+@define-color bg0   #061115;
+@define-color bg1   #0d181c;
+@define-color bg2   #131e22;
+@define-color bg3   #1c272b;
+@define-color bg4   #242f33;
+
+@define-color fg    #D9D7D6;
+
+@define-color red    #DF5B61;
+@define-color orange #E89982;
+@define-color yellow #ecd28b;
+@define-color green  #78B892;
+@define-color aqua   #67AFC1;
+@define-color blue   #6791C9;
+@define-color purple #C488EC;
+
+@define-color grey0  #313c40;
+@define-color grey1  #3b464a;
+@define-color grey2  #4f5a5e;

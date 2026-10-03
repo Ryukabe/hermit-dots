@@ -1,0 +1,21 @@
+/* Kanagawa Dragon */
+@define-color bg0     #181616;
+@define-color bg1     #1f1d1d;
+@define-color bg2     #282525;
+@define-color bg3     #2d2a2a;
+@define-color bg4     #393535;
+
+@define-color fg      #c5c9c5;
+@define-color accent  #8ba4b0;
+
+@define-color red     #c4746e;
+@define-color orange  #b6927b;
+@define-color yellow  #c4b28a;
+@define-color green   #8a9a7b;
+@define-color aqua    #8ea4a2;
+@define-color blue    #8ba4b0;
+@define-color purple  #a292a3;
+
+@define-color grey0   #928374;
+@define-color grey1   #a6a69c;
+@define-color grey2   #c8c093;

@@ -1,0 +1,21 @@
+/* Nightfox */
+@define-color bg0     #192330;
+@define-color bg1     #212e3d;
+@define-color bg2     #29394a;
+@define-color bg3     #2b3b51;
+@define-color bg4     #39495e;
+
+@define-color fg      #cdcecf;
+@define-color accent  #719cd6;
+
+@define-color red     #c94f6d;
+@define-color orange  #f4a261;
+@define-color yellow  #dbc074;
+@define-color green   #81b29a;
+@define-color aqua    #63cdcf;
+@define-color blue    #719cd6;
+@define-color purple  #9d79d6;
+
+@define-color grey0   #393b44;
+@define-color grey1   #575860;
+@define-color grey2   #71717a;

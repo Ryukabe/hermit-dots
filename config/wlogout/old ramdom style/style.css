@@ -1,0 +1,91 @@
+@import 'colors/colors.css';
+
+window {
+    font-family: SF Pro Text Medium;
+    font-size: 16pt;
+    color: @fg;
+    background-color: alpha(@bg0, .5);
+    border-color: transparent;
+}
+
+window * {
+    outline: none;
+    -gtk-outline-radius: 0;
+}
+
+button {
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 60px 60px;
+    background-color: transparent
+    transition: all 0.3s ease-in;
+    box-shadow: none;
+    border-radius: 16px;
+    border: none;
+    outline: none;
+    margin: 8px;
+
+    /* Use padding to control height instead of fixed size */
+    padding: 40px;
+}
+
+button:focus {
+    box-shadow: none;
+    outline: none;
+    border: none;
+    background-color: rgba(255, 255, 255, 0.05);
+    background-size: 60px 60px;
+    background-position: center center;
+}
+
+button:focus:not(:hover) {
+    background-color: rgba(255, 255, 255, 0.05);
+    box-shadow: none;
+    outline: none;
+    border: none;
+}
+
+button:hover {
+    background-color: @accent;
+    background-position: center center;
+    background-size: 60px 60px;
+    border: none;
+    outline: none;
+    border-radius: 16px;
+    transition: all 0.3s cubic-bezier(.55, 0.0, .28, 1.682);
+}
+
+#shutdown {
+    background-image: image(url("icons/power.png"));
+}
+#shutdown:hover {
+    background-image: image(url("icons/power-hover.png"));
+}
+
+#reboot {
+    background-image: image(url("icons/restart.png"));
+}
+#reboot:hover {
+    background-image: image(url("icons/restart-hover.png"));
+}
+
+#logout {
+    background-image: image(url("icons/logout.png"));
+}
+#logout:hover {
+    background-image: image(url("icons/logout-hover.png"));
+}
+
+#hibernate {
+    background-image: image(url("icons/hibernate.png"));
+}
+#hibernate:hover {
+    background-image: image(url("icons/hibernate-hover.png"));
+}
+
+#lock {
+    background-image: image(url("icons/lock.png"));
+}
+#lock:hover {
+    background-image: image(url("icons/lock-hover.png"));
+}

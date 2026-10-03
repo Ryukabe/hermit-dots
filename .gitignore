@@ -1,5 +1,28 @@
 # runtime state and personal files
 **/state/
 .active-shell
+.layout
 .env
 *.log
+
+# editor settings
+.vscode/
+
+# fish writes machine-specific state here
+config/fish/fish_variables
+
+# zsh frameworks and plugins are installed, not stored
+config/zsh/ohmyzsh/
+config/zsh/.oh-my-zsh/
+config/zsh/plugins/
+
+# dependencies and generated files (AGS)
+node_modules/
+@girs/
+
+# keys and backups
+*.pem
+*.key
+*.bak
+*~
+*.swp

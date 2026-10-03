@@ -1,0 +1,21 @@
+/* Rose Pine */
+@define-color bg0     #1f1d2e;
+@define-color bg1     #2a2837;
+@define-color bg2     #353243;
+@define-color bg3     #403d4f;
+@define-color bg4     #4b485a;
+
+@define-color fg      #e0def4;
+@define-color accent  #9ccfd8;
+
+@define-color red     #eb6f92;
+@define-color orange  #f6c177;
+@define-color yellow  #f6c177;
+@define-color green   #31748f;
+@define-color aqua    #ebbcba;
+@define-color blue    #9ccfd8;
+@define-color purple  #c4a7e7;
+
+@define-color grey0   #2f2c40;
+@define-color grey1   #908caa;
+@define-color grey2   #6e6a86;
