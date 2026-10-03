@@ -22,8 +22,8 @@ A hermit crab moves between shells. So does this setup: you can swap the whole d
 
 | Shell | What it is |
 | --- | --- |
-| **Quickshell** | A single floating island bar at the top of the screen. It shows a clock at rest and morphs into media controls, volume and brightness, an app launcher, a power menu and a control center. Written in QML/JS only. Inspired by Sane's Quickshell setup. |
-| **AGS** | A dashboard and quick settings panel, toggled with `ags request`. <!-- TODO: describe the AGS shell --> |
+| **Quickshell** | A single floating island bar at the top of the screen. It shows a clock at rest and morphs into media controls, volume and brightness, an app launcher, a power menu and a control center. Written in QML/JS only. Inspired by SaneAspect's Quickshell setup. |
+| **AGS** | A dashboard and quick settings panel, toggled with `ags request`. It also starts a small polkit helper written in Vala, which the launch script rebuilds whenever its source changes. <!-- TODO: describe the rest of the AGS shell --> |
 
 ## Switching shells
 
@@ -31,11 +31,10 @@ The active shell is stored in `~/.config/hypr/.active-shell`. Whenever Hyprland 
 
 | Keys | Action |
 | --- | --- |
-| `Super + Ctrl + Alt + Q` | Switch to Quickshell |
-| `Super + Ctrl + Alt + A` | Switch to AGS |
-| `Super + Shift + R` | Reload Hyprland (and re-read the binds) |
+| `Super + Ctrl + Alt + Q` | Switch to Quickshell (stops it if it is already running) |
+| `Super + Ctrl + Alt + A` | Switch to AGS (stops it if it is already running) |
 
-<!-- TODO: confirm what switch-shell.sh does (stops the running shell, starts the other, writes .active-shell) -->
+Both keys run `scripts/switch-shell.sh` with `qs` or `ags`. If the shell you asked for is already running, the script just stops it and leaves `.active-shell` as it was. Otherwise it stops the other shell, writes the new name to `.active-shell`, reloads Hyprland so the matching binds load, and starts the new shell. AGS is started and stopped through `ags-launch-kill.sh`, which also manages the polkit helper and launches AGS with `GSK_RENDERER=gl`.
 
 The bind files live in `~/.config/hypr/modules/binds/`:
 
@@ -65,7 +64,7 @@ The full palette, including the terminal colors, is in [`palette.json`](palette.
 
 TODO: install or symlink steps for the configs in `config/`.
 
-The binds depend on these programs: Hyprland, Quickshell, AGS, `brightnessctl`, WirePlumber (`wpctl`), `playerctl`, `hyprshot`, `hyprpicker`, `hyprlock`, `wlogout`, `cliphist`, kitty, alacritty, nautilus, thunar, zen-browser, helium-browser, VS Code, Obsidian and Spotify. The screenshot bind targets the monitor named `eDP-1`, so change that if your display has a different name.
+The binds depend on these programs: Hyprland, Quickshell, AGS, `brightnessctl`, WirePlumber (`wpctl`), `playerctl`, `hyprshot`, `hyprpicker`, `hyprlock`, `wlogout`, `cliphist`, kitty, alacritty, nautilus, thunar, zen-browser, helium-browser, VS Code, Obsidian and Spotify. The AGS polkit helper is built with `valac` and needs the polkit agent and gobject libraries, GIO and json-glib. The screenshot bind targets the monitor named `eDP-1`, so change that if your display has a different name.
 
 ## Keybinds
 
@@ -76,7 +75,6 @@ The binds depend on these programs: Hyprland, Quickshell, AGS, `brightnessctl`, 
 | Keys | Action |
 | --- | --- |
 | `Super + ,` | Settings |
-| `Super + Tab` | Workspace switcher |
 | `Super + Space` | App launcher |
 | `Super + V` | Clipboard history |
 | `Super + A` | Control center |
@@ -93,6 +91,7 @@ The binds depend on these programs: Hyprland, Quickshell, AGS, `brightnessctl`, 
 | --- | --- |
 | `Super + grave` | Quick settings |
 | `Super + Shift + grave` | Dashboard |
+| `Super + Alt + R` | Reload AGS |
 | Brightness and volume keys | Run `brightnessctl` and `wpctl` directly |
 
 ### Windows and workspaces (always on)
@@ -102,7 +101,7 @@ The binds depend on these programs: Hyprland, Quickshell, AGS, `brightnessctl`, 
 | `Super + arrows` | Move focus |
 | `Super + 1-0` | Go to workspace |
 | `Super + Shift + 1-0` | Move window to workspace |
-| `Alt + Tab` | Cycle windows |
+| `Super + Tab` | Workspace switcher (Quickshell only) |
 | `Super + left mouse` / `right mouse` | Drag / resize window |
 | `Super + Shift + F` | Toggle floating |
 | `Super + Shift + P` | Pseudo-tile |
@@ -125,8 +124,8 @@ The binds depend on these programs: Hyprland, Quickshell, AGS, `brightnessctl`, 
 
 | Keys | Action |
 | --- | --- |
-| `Super + Ctrl + Alt + Return` | Run the system reload script |
-| `Super + Alt + R` | Reload AGS |
+| `Super + Shift + R` | Reload Hyprland (re-reads the binds) |
+| `Super + Ctrl + Alt + Return` | Reload Hyprland and restart the active shell |
 | `Super + F4` | wlogout |
 | `Shift + Alt + L` | hyprlock |
 | `Super + Print` / `Super + Shift + Print` | Screenshot of the screen / of a region |
@@ -136,9 +135,9 @@ The binds depend on these programs: Hyprland, Quickshell, AGS, `brightnessctl`, 
 
 ## Credits
 
-- Island concept inspired by Sane's Quickshell setup
+- Island concept inspired by SaneAspect's Quickshell setup. SaneAspect is a Hyprland ricing YouTuber.
 - Status and terminal colors adapted from the Everblush and rxyhn themes
 
 ## License
 
-TODO
+Released under the [MIT License](LICENSE).
