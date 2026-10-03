@@ -1,0 +1,13 @@
+{
+  "name": "hermit",
+  "version": "2.0.0",
+  "mode": "dark",
+  "colors": {
+    "base": { "deep": "#0A0A0A", "default": "#101010", "surface": "#1C1C1C" },
+    "text": { "primary": "#F6F1EA", "muted": "#8C8C8C" },
+    "border": { "color": "#8C8C8C", "opacity": 0.12 },
+    "accent": { "primary": "#77B0A8", "light": "#8FC8BF", "deep": "#5F8F87", "tint": "#1F2B29" },
+    "status": { "success": "#8CCF7E", "warning": "#FCB163", "error": "#DF5B61" },
+    "terminal": { "blue": "#67B0E8", "cyan": "#6CBFBF", "yellow": "#E5C76B", "purple": "#C488EC", "pink": "#EE9CDD" }
+  }
+}
