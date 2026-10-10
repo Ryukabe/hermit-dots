@@ -54,8 +54,8 @@ hl.bind(mainMod .. " + RETURN",              hl.dsp.exec_cmd("kitty"))
 hl.bind(mainMod .. " + ALT + RETURN",        hl.dsp.exec_cmd("alacritty"))
 
 -- File manager
-hl.bind(mainMod .. " + F",                   hl.dsp.exec_cmd("nautilus"))
-hl.bind(mainMod .. " + ALT + F",             hl.dsp.exec_cmd("thunar"))
+hl.bind("SUPER + ALT + F",                   hl.dsp.exec_cmd("nautilus"))
+hl.bind("SUPER + F",             hl.dsp.exec_cmd("thunar"))
 
 -- Browser
 hl.bind(mainMod .. " + B",                   hl.dsp.exec_cmd("zen-browser"))

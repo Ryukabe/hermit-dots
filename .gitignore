@@ -16,6 +16,9 @@ config/zsh/ohmyzsh/
 config/zsh/.oh-my-zsh/
 config/zsh/plugins/
 
+# Quicksshell stores its state here
+config/quickshell/state/
+
 # dependencies and generated files (AGS)
 node_modules/
 @girs/

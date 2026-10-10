@@ -53,9 +53,11 @@ The installer first asks which shells you want: both, Quickshell only, or AGS on
 
 Things worth knowing:
 
-- **Symlinks, not copies.** Your `~/.config` entries point back into the repo, so keep the clone where it is. Use `--copy` if you would rather copy the files.
+- **Symlinks.** Your `~/.config` entries point back into the repo, so keep the clone where it is. The installer refuses to run from `/tmp`.
 - **Nothing is overwritten.** Anything already in `~/.config` is renamed to `<name>.bak-<timestamp>` first.
-- **Single-shell installs.** If you pick only one shell, the other shell's config is not linked, and `~/.config/hypr/.active-shell` is set so Hyprland loads the right binds.
+- **Apps are optional.** The `apps` module asks before each group (terminals, file managers, shells, browsers, VS Code, Obsidian, Spotify), so you can skip any of them.
+- **Single-shell installs.** If you pick only one shell, the other shell's config is not linked, and `~/.config/hypr/.active-shell` is set so Hyprland loads the right binds. Your choice is saved in `~/.local/state/hermit-dots/shells`.
+- **Updating.** Settings > About checks GitHub and pulls new commits (fast-forward only). Because the configs are symlinks, a pull updates them straight away.
 - **Resuming.** If a module fails, the installer stops and prints the command to resume, for example `./install/install.sh --only fonts`.
 
 Options:
@@ -66,8 +68,7 @@ Options:
 | `./install/install.sh --shells qs` | Choose shells without being asked (`qs`, `ags` or `both`) |
 | `./install/install.sh --only quickshell,dotfiles` | Run only these modules |
 | `./install/install.sh --skip fonts,network` | Run everything except these modules |
-| `./install/install.sh --yes` | Accept every prompt's default answer (installs both shells) |
-| `./install/install.sh --copy` | Copy configs instead of symlinking |
+| `./install/install.sh --yes` | Accept every prompt's default answer (uses your saved shell choice, or both on a first run) |
 
 Each module also runs on its own, for example `bash install/modules/40-fonts.sh`.
 
