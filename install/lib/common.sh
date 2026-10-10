@@ -6,8 +6,8 @@ REPO_ROOT="$(cd "$INSTALL_DIR/.." && pwd)"
 CONFIG_SRC="$REPO_ROOT/config"
 CONFIG_DST="${XDG_CONFIG_HOME:-$HOME/.config}"
 ASSUME_YES="${HERMIT_YES:-false}"   # set by install.sh --yes
-USE_COPY="${HERMIT_COPY:-false}"    # set by install.sh --copy
 AUR_HELPER="${AUR_HELPER:-}"
+SHELLS_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/hermit-dots/shells"
 
 # ---- output ---------------------------------------------------------------
 c_info() { printf '\033[1;34m[info]\033[0m %s\n' "$1"; }
@@ -103,29 +103,45 @@ backup_path() {
 }
 
 # ---- shell choice ---------------------------------------------------------
-# HERMIT_SHELLS is one of: qs | ags | both
+# HERMIT_SHELLS is one of: qs | ags | both. The choice is saved so later runs
+# (--yes, and the updater in Settings > About) reuse it.
+save_shells() {
+  mkdir -p "$(dirname "$SHELLS_FILE")"
+  printf '%s\n' "$HERMIT_SHELLS" > "$SHELLS_FILE"
+}
+
 choose_shells() {
-  [[ -n "${HERMIT_SHELLS:-}" ]] && return 0
-  if [[ "$ASSUME_YES" == true ]]; then
-    export HERMIT_SHELLS=both
+  if [[ -n "${HERMIT_SHELLS:-}" ]]; then
+    save_shells
     return 0
   fi
 
-  local ans
+  local saved="" ans def=1
+  if [[ -f "$SHELLS_FILE" ]]; then saved="$(<"$SHELLS_FILE")"; fi
+  case "$saved" in qs|ags|both) ;; *) saved="" ;; esac
+
+  if [[ "$ASSUME_YES" == true ]]; then
+    export HERMIT_SHELLS="${saved:-both}"
+    save_shells
+    return 0
+  fi
+
+  case "$saved" in qs) def=2 ;; ags) def=3 ;; esac
   echo
   echo "Which shell(s) do you want to install?"
   echo "  1) Both Quickshell and AGS (switch between them with a keybind)"
   echo "  2) Quickshell only"
   echo "  3) AGS only"
   while true; do
-    read -rp "Choose [1-3, default 1]: " ans || ans=1
-    case "${ans:-1}" in
+    read -rp "Choose [1-3, default $def]: " ans || ans=$def
+    case "${ans:-$def}" in
       1) export HERMIT_SHELLS=both; break ;;
       2) export HERMIT_SHELLS=qs;   break ;;
       3) export HERMIT_SHELLS=ags;  break ;;
       *) c_warn "Please enter 1, 2 or 3." ;;
     esac
   done
+  save_shells
   c_ok "Shell choice: $HERMIT_SHELLS"
 }
 

@@ -1,0 +1,72 @@
+/* ---------- hermit palette ---------- */
+@define-color theme_bg_color #101010;            /* base.default */
+@define-color theme_fg_color #F6F1EA;            /* text.primary */
+@define-color theme_base_color #1C1C1C;          /* base.surface */
+@define-color theme_text_color #F6F1EA;
+@define-color theme_selected_bg_color #77B0A8;   /* accent.primary */
+@define-color theme_selected_fg_color #0A0A0A;   /* base.deep */
+@define-color theme_unfocused_bg_color #101010;
+@define-color theme_unfocused_fg_color #8C8C8C;  /* text.muted */
+@define-color theme_tooltip_bg_color #1C1C1C;
+@define-color theme_tooltip_fg_color #F6F1EA;
+@define-color content_view_bg #1C1C1C;
+@define-color insensitive_bg_color #101010;
+@define-color insensitive_fg_color #8C8C8C;
+@define-color borders alpha(#8C8C8C, 0.12);
+@define-color unfocused_borders alpha(#8C8C8C, 0.12);
+@define-color wm_bg #1C1C1C;
+@define-color wm_unfocused_bg #101010;
+
+/* ---------- colors used by thunar.css (edit these to recolor) ---------- */
+@define-color accent_color #77B0A8;              /* accent.primary */
+@define-color accent_light #8FC8BF;              /* accent.light: selected text */
+@define-color surface_low #1C1C1C;               /* file card + status bar (base.surface) */
+@define-color select_bg mix(@surface_low, @accent_color, 0.30); /* solid selection fill */
+
+/* ---------- names adw-gtk3 reads ---------- */
+@define-color accent_bg_color @accent_color;
+@define-color accent_fg_color #0A0A0A;
+@define-color window_bg_color @theme_bg_color;
+@define-color window_fg_color @theme_fg_color;
+@define-color headerbar_bg_color @theme_bg_color;
+@define-color headerbar_fg_color @theme_fg_color;
+@define-color popover_bg_color @theme_base_color;
+@define-color popover_fg_color @theme_fg_color;
+@define-color view_bg_color @theme_bg_color;
+@define-color view_fg_color @theme_fg_color;
+@define-color card_bg_color @theme_bg_color;
+@define-color card_fg_color @theme_fg_color;
+@define-color sidebar_bg_color @window_bg_color;
+@define-color sidebar_fg_color @window_fg_color;
+@define-color sidebar_border_color @window_bg_color;
+@define-color sidebar_backdrop_color @window_bg_color;
+
+/* Thunar layout (from Caelestia) */
+@import "thunar.css";
+
+/* ---------- right-click / 3-dot menus: solid, palette colors (all GTK3 apps) ---------- */
+menu,
+.menu,
+.context-menu,
+popover.background {
+    background-color: @theme_base_color;
+    color: @theme_fg_color;
+    border: 1px solid alpha(#8C8C8C, 0.12);
+    border-radius: 10px;
+    padding: 4px;
+}
+
+menu menuitem,
+.menu menuitem,
+popover modelbutton {
+    border-radius: 6px;
+    padding: 5px 10px;
+}
+
+menu menuitem:hover,
+.menu menuitem:hover,
+popover modelbutton:hover,
+popover modelbutton:focus {
+    background-color: @select_bg;
+    color: @accent_light;
+}

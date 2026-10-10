@@ -1,16 +1,7 @@
 #!/usr/bin/env bash
 #
 # hermit-dots installer: runs the modules in install/modules/ in order.
-#
-#   ./install.sh                     run everything (asks which shells to install)
-#   ./install.sh --list              show modules
-#   ./install.sh --shells qs         choose shells: qs | ags | both
-#   ./install.sh --only quickshell,dotfiles
-#   ./install.sh --skip fonts,network
-#   ./install.sh --yes               accept each prompt's default answer
-#   ./install.sh --copy              copy configs instead of symlinking
-#
-# Each module is also runnable on its own: bash modules/30-quickshell.sh
+# Run ./install/install.sh --help for the options.
 
 set -euo pipefail
 
@@ -19,10 +10,24 @@ export INSTALL_DIR
 # shellcheck source=lib/common.sh
 source "$INSTALL_DIR/lib/common.sh"
 
+# Safety net: git keeps the executable bit, but make sure every module can run on its own.
+chmod +x "$INSTALL_DIR"/modules/*.sh 2>/dev/null || true
+
 ONLY=() SKIP=()
 
 usage() {
-  sed -n '3,14p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+  cat <<'EOF'
+hermit-dots installer: runs the modules in install/modules/ in order.
+
+  ./install/install.sh                   run everything (asks which shells)
+  ./install/install.sh --list            show modules
+  ./install/install.sh --shells qs       choose shells: qs | ags | both
+  ./install/install.sh --only quickshell,dotfiles
+  ./install/install.sh --skip fonts,network
+  ./install/install.sh --yes             accept each prompt's default answer
+
+Each module also runs on its own: bash install/modules/30-quickshell.sh
+EOF
 }
 
 module_name() { basename "$1" .sh | sed 's/^[0-9]*-//'; }
@@ -58,8 +63,7 @@ while [[ $# -gt 0 ]]; do
         qs|ags|both) export HERMIT_SHELLS="$2"; shift 2 ;;
         *) c_err "--shells must be one of: qs, ags, both"; exit 1 ;;
       esac ;;
-    --yes|-y) export HERMIT_YES=true; shift ;;
-    --copy) export HERMIT_COPY=true; shift ;;
+    --yes|-y) export HERMIT_YES=true; ASSUME_YES=true; shift ;;
     -h|--help) usage; exit 0 ;;
     *) c_err "Unknown option: $1"; usage; exit 1 ;;
   esac
@@ -86,7 +90,7 @@ for f in "$INSTALL_DIR"/modules/*.sh; do
 
   c_step "Module: $n"
   if ! bash "$f"; then
-    c_err "Module '$n' failed. Fix it, then resume with: ./install.sh --only $n"
+    c_err "Module '$n' failed. Fix it, then resume with: ./install/install.sh --only $n"
     exit 1
   fi
 done
