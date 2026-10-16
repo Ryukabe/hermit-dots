@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640">
+  <rect width="1280" height="640" fill="#101010"/>
+<path d="M340 140 A12 12 0 0 1 340 164 A24 24 0 0 1 340 116 A36 36 0 0 1 340 188 A48 48 0 0 1 340 92 A60 60 0 0 1 340 212 A72 72 0 0 1 340 68 A84 84 0 0 1 340 236"
+      transform="translate(320 320) scale(1.5) translate(-334 -152)"
+      fill="none" stroke="#88C0D0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="600" y="300" font-family="'JetBrains Mono','Fira Code',ui-monospace,Menlo,Consolas,monospace"
+        font-size="92" fill="#F6F1EA">hermit<tspan fill="#8C8C8C">-dots</tspan></text>
+  <text x="600" y="362" font-family="'Inter','Segoe UI',Helvetica,Arial,sans-serif"
+        font-size="36" fill="#8C8C8C">Two shells, one setup.</text>
+  <rect x="600" y="395" width="96" height="5" rx="2.5" fill="#88C0D0"/>
+  <text x="600" y="445" font-family="'JetBrains Mono','Fira Code',ui-monospace,Menlo,Consolas,monospace"
+        font-size="28" fill="#88C0D0">Quickshell · AGS · Hyprland</text>
+</svg>
