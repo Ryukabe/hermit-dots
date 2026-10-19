@@ -153,6 +153,7 @@ QtObject {
         templateQt6ct: false,
         templateStarship: false,
         // sound & media
+        brightnessStep: 5,
         volumeStep: 5,
         volumeMax: 100,
         lyricsBackend: "Auto",
@@ -172,6 +173,11 @@ QtObject {
         appIconTheme: "",
         // about
         updateAutoCheck: true,
+        // network
+        wifiScanIntervalSec: 15,
+        bluetoothShowBattery: true,
+        bluetoothReconnectAtStartup: false,
+        bluetoothLastDevice: "",
     })
 
     // ================= NAVIGATION / TRANSIENT STATE (not persisted) =================
@@ -299,6 +305,14 @@ QtObject {
     // ================= UPDATES =================
     property bool updateAutoCheck: root.defaults.updateAutoCheck
 
+    // ================= NETWORK =================
+    // WifiService rescans this often, but only while a Wi-Fi view is open.
+    property real wifiScanIntervalSec: root.defaults.wifiScanIntervalSec
+    property bool bluetoothShowBattery: root.defaults.bluetoothShowBattery
+    property bool bluetoothReconnectAtStartup: root.defaults.bluetoothReconnectAtStartup
+    // MAC of the last device BluetoothService saw connected. Only BluetoothService writes it.
+    property string bluetoothLastDevice: root.defaults.bluetoothLastDevice
+
     // ================= CLOCK =================
     // Single source of truth for the bar clock AND the Clock settings preview.
     // The two format strings below are derived — never persisted, never set by hand.
@@ -359,6 +373,10 @@ QtObject {
     property bool motionIconsEnabled: root.defaults.motionIconsEnabled
     property real motionIconSpeedPercent: root.defaults.motionIconSpeedPercent
     property real motionIconBouncePercent: root.defaults.motionIconBouncePercent
+
+    // ================= DISPLAY =================
+    // How much the brightness keys, IPC calls and island scroll change brightness per step.
+    property int brightnessStep: root.defaults.brightnessStep
 
     // ================= SOUND & MEDIA =================
     // Stored here so they persist. VolumeService / the media module still have to read them.

@@ -235,7 +235,7 @@ Item {
                 id: tileLoader
                 anchors.fill: parent
                 onLoaded: {
-                    if (item) {
+                    if (item && item instanceof Item) {
                         item.anchors.fill = tileLoader
                     }
                 }
@@ -253,6 +253,7 @@ Item {
                     case "volume": return volumeTile
                     case "brightness": return brightnessTile
                     case "media": return mediaTile
+                    case "shades": return shadesTile
                     default: return null
                     }
                 }
@@ -378,7 +379,8 @@ Item {
     Component { id: focusTile; FocusToggleTile { onSubviewRequested: root.subviewRequestedFor("focus") } }
     Component { id: powerProfileTile; PowerProfileToggleTile { onSubviewRequested: root.subviewRequestedFor("powerprofile") } }
     Component { id: caffeineTile; CaffeineToggleTile { onSubviewRequested: root.subviewRequestedFor("caffeine") } }
-    Component { id: nightlightTile; NightLightToggleTile {} }
+    Component { id: nightlightTile; NightLightToggleTile { onSubviewRequested: root.subviewRequestedFor("nightlight") } }
+    Component { id: shadesTile; ShadesToggleTile { onSubviewRequested: root.subviewRequestedFor("shades") } }
     Component { id: airplaneTile; AirplaneModeToggleTile {} }
     Component { id: recordingTile; RecordingToggleTile {} }
     Component { id: lightmodeTile; LightModeToggleTile {} }
