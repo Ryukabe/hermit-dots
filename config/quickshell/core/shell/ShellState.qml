@@ -1,14 +1,9 @@
 // core/shell/ShellState.qml
 pragma Singleton
 import QtQuick
-import Quickshell.Io
 import "../../features/hyprland"
-import "../../features/lockscreen"
-import "../../features/notifications"
-import "../../features/sound"
-import "../../features/theme"
 import "../../features/timer"
-import "."
+
 
 QtObject {
     id: root
@@ -22,9 +17,14 @@ QtObject {
         islandCornerRadius: 12,
         islandBorderWidth: 0,
         islandClickOutsideDismiss: true,
-        islandNotchMode: false,
+        islandStyle: "Island",
         islandNotchFlare: 14,
-        islandHoverScale: 1.02,
+        //islandHoverScale: 1.02,
+        // island magnify on hover
+        islandMagnifyTrigger: "Pointer over",
+        islandMagnifyWidth: 12,
+        islandMagnifyHeight: 4,
+        islandMagnifyMoveDown: 3,
         radiusUniversal: true,
         customRadiusCard: 12,
         customRadiusControl: 6,
@@ -40,13 +40,31 @@ QtObject {
         islandHideDelayMs: 600,
         islandScrollVolume: true,
         islandScrollBrightness: true,
+        // hover panel
+        hoverPanelEnabled: true,
+        hoverPanelDelayMs: 2000,
+        hoverPanelCloseDelayMs: 400,
+        hoverPanelShowHint: true,
+        hoverPanelWidth: 420,
+        hoverPanelShowDate: true,
+        hoverPanelShowLevels: true,
+        hoverPanelShowNotifications: true,
+        hoverPanelShowTimer: true,
+        hoverPanelShowActions: true,
         // module sizing
-        launcherWidth: 420,
+        launcherWidth: 620,
         launcherMaxRows: 7,
         clipboardWidth: 420,
         clipboardMaxRows: 6,
         controlCenterWidth: 580,
         controlCenterHeight: 400,
+        controlCenterColumns: 6,
+        controlCenterTileHeight: 68,
+        controlCenterGap: 6,
+        controlCenterShowNames: true,
+        controlCenterShowStatus: true,
+        controlCenterShowDot: true,
+        settingsVersion: 0,
         notificationCenterWidth: 360,
         notificationCenterMaxHeight: 480,
         powerMenuWidth: 320,
@@ -85,23 +103,32 @@ QtObject {
         motionIconsEnabled: true,
         motionIconSpeedPercent: 100,
         motionIconBouncePercent: 50,
-        // clock
+        motionIslandBouncePercent: 40,
+        // clock (which items show, and their order, live in ClockLayoutService)
         clockUse24Hour: false,
         clockShowSeconds: false,
         clockLeadingZero: true,
         clockLowercaseAmPm: false,
-        clockDateStyle: 0,
-        clockShowVisualizer: true,
-        clockShowWorkspaces: true,
+        clockDateStyle: 1,
         clockVisualizerBars: 4,
         clockVisualizerBarWidth: 3,
         clockVisualizerGap: 3,
         clockVisualizerMaxHeight: 10,
         clockVisualizerSpeedPercent: 100,
         clockVisualizerColor: "Accent",
-        clockShowPrivacyIndicator: true,
-        clockShowTimerIcon: true,
-        clockShowRecordingIndicator: true,
+        clockAnimation: "Flip",
+        clockFlipMs: 420,
+        clockFlipCards: true,
+        // Bar style: which zone ("left" | "center" | "right") each clock item sits in. Unlisted items sit in the center.
+        clockItemZones: ({
+            workspaces: "left",
+            date: "center",
+            time: "center",
+            visualizer: "right",
+            timer: "right",
+            privacy: "right",
+            recording: "right"
+        }),
         timerToastShowRecordingIndicator: true,
         // workspaces
         workspaceShownCount: 5,
@@ -112,6 +139,10 @@ QtObject {
         workspaceBounce: true,
         workspaceDotSize: 6,
         workspaceActiveWidth: 20,
+        workspaceShowWindows: true,
+        workspaceWindowsOnSpecial: true,
+        workspaceMaxWindowIcons: 5,
+        workspacePerMonitor: true,
         // notifications & focus
         notificationPreviewsEnabled: true,
         focusModeEnabled: false,
@@ -127,6 +158,10 @@ QtObject {
         notificationOverFullscreen: false,
         notificationGroupExpanded: false,
         notificationGroupPreviewCount: 3,
+        notificationSoundMode: "Default",
+        notificationSoundFile: "",
+        notificationPopupStyle: "Compact",
+        notificationSnoozeMinutes: 10,
         // event toasts
         eventToastMs: 2500,
         eventToastDnd: true,
@@ -135,6 +170,40 @@ QtObject {
         eventToastAudioInput: true,
         appToastEnabled: true,
         appToastMs: 2000,
+        // blur (written to Hyprland)
+        blurUniversal: true,
+        blurEnabled: true,
+        customBlurWindows: true,
+        customBlurIsland: true,
+        blurIslandCutoff: 0.5,
+        blurSize: 5,
+        blurPasses: 2,
+        blurNoise: 0.0117,
+        blurContrast: 0.8916,
+        blurBrightness: 0.8,
+        blurVibrancy: 0.5,
+        blurVibrancyDarkness: 0,
+        blurIgnoreOpacity: true,
+        blurXray: false,
+        blurOptimizations: true,
+        blurPopups: false,
+        // windows (Hyprland general/decoration, written by WindowDecorationService)
+        customRadiusWindow: 15,
+        windowRoundingPower: 4,
+        windowGapsIn: 4,
+        windowGapsOut: 8,
+        windowBorderSize: 0,
+        windowActiveOpacity: 1.0,
+        windowInactiveOpacity: 1.0,
+        windowFullscreenOpacity: 1.0,
+        windowDimInactive: false,
+        windowDimStrength: 0.5,
+        windowShadowEnabled: true,
+        windowShadowRange: 15,
+        windowShadowPower: 2,
+        windowShadowScale: 1.0,
+        windowShadowOpacity: 0.87,
+        opacityUniversal: false,
         // typography
         fontSizeBase: 15,
         fontBody: "SF Pro Text",
@@ -142,6 +211,7 @@ QtObject {
         iconStyle: "Rounded",
         iconWeight: 400,
         iconFilled: false,
+        uiDensity: "Default",
         // templates
         templatesEnabled: true,
         templateGtk3: true,
@@ -152,6 +222,10 @@ QtObject {
         templateAlacritty: false,
         templateBtop: false,
         templateFirefox: false,
+        templateChrome: false,
+        templateBrave: false,
+        templateHelium: false,
+        templateZen: false,
         templateHelix: false,
         templateObsidian: false,
         templateQt5ct: false,
@@ -163,6 +237,7 @@ QtObject {
         volumeMax: 100,
         lyricsBackend: "Auto",
         defaultPlayer: "Spotify",
+        volumeShowPopup: true,
         // language & region
         weatherUnit: "°C",
         systemTempUnit: "°C",
@@ -208,6 +283,10 @@ QtObject {
     // Notification center grouping: groups start fully open, or show this many before collapsing.
     property bool notificationGroupExpanded: root.defaults.notificationGroupExpanded
     property int notificationGroupPreviewCount: root.defaults.notificationGroupPreviewCount
+    property string notificationSoundMode: root.defaults.notificationSoundMode   // "Off" | "Default" | "Custom"
+    property string notificationSoundFile: root.defaults.notificationSoundFile   // full path; only used in Custom mode
+    property string notificationPopupStyle: root.defaults.notificationPopupStyle   // "Compact" | "Detailed" | "Interactive"
+    property int notificationSnoozeMinutes: root.defaults.notificationSnoozeMinutes
 
     // ================= EVENT TOASTS =================
     property real eventToastMs: root.defaults.eventToastMs
@@ -217,7 +296,68 @@ QtObject {
     property bool eventToastAudioInput: root.defaults.eventToastAudioInput
     property bool appToastEnabled: root.defaults.appToastEnabled
     property real appToastMs: root.defaults.appToastMs
+
+    // ================= BLUR =================
+    // Universal on = one switch (blurEnabled) for windows and the island. Off = one switch each.
+    // Strength and look are global in Hyprland, so they are shared either way.
+    property bool blurUniversal: root.defaults.blurUniversal
+    property bool blurEnabled: root.defaults.blurEnabled
+    property bool customBlurWindows: root.defaults.customBlurWindows
+    property bool customBlurIsland: root.defaults.customBlurIsland
+    property real blurIslandCutoff: root.defaults.blurIslandCutoff    // 0-1, island pixels more see-through than this are not blurred
+    property int blurSize: root.defaults.blurSize
+    property int blurPasses: root.defaults.blurPasses
+    property real blurNoise: root.defaults.blurNoise
+    property real blurContrast: root.defaults.blurContrast
+    property real blurBrightness: root.defaults.blurBrightness
+    property real blurVibrancy: root.defaults.blurVibrancy
+    property real blurVibrancyDarkness: root.defaults.blurVibrancyDarkness
+    property bool blurIgnoreOpacity: root.defaults.blurIgnoreOpacity
+    property bool blurXray: root.defaults.blurXray
+    property bool blurOptimizations: root.defaults.blurOptimizations
+    property bool blurPopups: root.defaults.blurPopups
+
+    // Derived, never persisted. BlurService and the Surfaces page both read these.
+    readonly property bool blurWindowsActive: blurUniversal ? blurEnabled : customBlurWindows
+    readonly property bool blurIslandActive: blurUniversal ? blurEnabled : customBlurIsland
+    readonly property bool blurAnyActive: blurWindowsActive || blurIslandActive
     
+    // ================= WINDOWS =================
+    property real windowRoundingPower: root.defaults.windowRoundingPower    // 2 = circle, 4 = squircle
+    property int windowGapsIn: root.defaults.windowGapsIn
+    property int windowGapsOut: root.defaults.windowGapsOut
+    property int windowBorderSize: root.defaults.windowBorderSize
+
+    // Derived, never persisted. Window rounding is part of the radius system:
+    // universal on = windows follow the island radius, off = their own slider.
+    readonly property real windowRounding: radiusUniversal ? islandCornerRadius : customRadiusWindow
+    
+    property real windowActiveOpacity: root.defaults.windowActiveOpacity
+    property real windowInactiveOpacity: root.defaults.windowInactiveOpacity
+    property real windowFullscreenOpacity: root.defaults.windowFullscreenOpacity
+    property bool windowDimInactive: root.defaults.windowDimInactive
+    property real windowDimStrength: root.defaults.windowDimStrength
+    property bool windowShadowEnabled: root.defaults.windowShadowEnabled
+    property int windowShadowRange: root.defaults.windowShadowRange
+    property int windowShadowPower: root.defaults.windowShadowPower
+    property real windowShadowScale: root.defaults.windowShadowScale
+    property real windowShadowOpacity: root.defaults.windowShadowOpacity   // alpha of the shared shadow color
+    // Universal on = one slider (the shell Background opacity) also drives all three window opacities.
+    property bool opacityUniversal: root.defaults.opacityUniversal
+
+    // ================= HOVER PANEL =================
+    // Rest the pointer on the idle island and a panel opens (Island.qml). Settings: Bar > Hover panel.
+    property bool hoverPanelEnabled: root.defaults.hoverPanelEnabled
+    property real hoverPanelDelayMs: root.defaults.hoverPanelDelayMs
+    property real hoverPanelCloseDelayMs: root.defaults.hoverPanelCloseDelayMs
+    property bool hoverPanelShowHint: root.defaults.hoverPanelShowHint
+    property real hoverPanelWidth: root.defaults.hoverPanelWidth
+    property bool hoverPanelShowDate: root.defaults.hoverPanelShowDate
+    property bool hoverPanelShowLevels: root.defaults.hoverPanelShowLevels
+    property bool hoverPanelShowNotifications: root.defaults.hoverPanelShowNotifications
+    property bool hoverPanelShowTimer: root.defaults.hoverPanelShowTimer
+    property bool hoverPanelShowActions: root.defaults.hoverPanelShowActions
+
     // ================= TYPOGRAPHY =================
     // Fonts.qml and Dimens.qml read these; the Typography page writes them.
     property real fontSizeBase: root.defaults.fontSizeBase            // 15 = 1.0 scale for Dimens.fontSize*
@@ -226,6 +366,8 @@ QtObject {
     property string iconStyle: root.defaults.iconStyle                // "Rounded" | "Outlined" | "Sharp"
     property int iconWeight: root.defaults.iconWeight
     property bool iconFilled: root.defaults.iconFilled
+    property string uiDensity: root.defaults.uiDensity                // "Compact" | "Default" | "Roomy"
+
     // ====================== TEMPLATES ======================
     property bool templatesEnabled: root.defaults.templatesEnabled
     property bool templateGtk3: root.defaults.templateGtk3
@@ -236,6 +378,10 @@ QtObject {
     property bool templateAlacritty: root.defaults.templateAlacritty
     property bool templateBtop: root.defaults.templateBtop
     property bool templateFirefox: root.defaults.templateFirefox
+    property bool templateChrome: root.defaults.templateChrome
+    property bool templateBrave: root.defaults.templateBrave
+    property bool templateHelium: root.defaults.templateHelium
+    property bool templateZen: root.defaults.templateZen
     property bool templateHelix: root.defaults.templateHelix
     property bool templateObsidian: root.defaults.templateObsidian
     property bool templateQt5ct: root.defaults.templateQt5ct
@@ -247,10 +393,20 @@ QtObject {
     property real islandCornerRadius: root.defaults.islandCornerRadius
     property real islandBorderWidth: root.defaults.islandBorderWidth
     property bool islandClickOutsideDismiss: root.defaults.islandClickOutsideDismiss
-    property bool islandNotchMode: root.defaults.islandNotchMode
     property real islandNotchFlare: root.defaults.islandNotchFlare
-    property real islandHoverScale: root.defaults.islandHoverScale
 
+    property string islandStyle: root.defaults.islandStyle   // "Island" | "Notch" | "Bar"
+    // Kept so code that only reads it keeps working. Anything that changes the style sets islandStyle.
+    readonly property bool islandNotchMode: islandStyle === "Notch"
+    
+    //property real islandHoverScale: root.defaults.islandHoverScale
+
+    // Magnify on hover: the island grows wider and a bit taller (downwards) and moves down a little.
+    property string islandMagnifyTrigger: root.defaults.islandMagnifyTrigger   // "Off" | "Pointer over" | "Panel opens" | "Both"
+    property real islandMagnifyWidth: root.defaults.islandMagnifyWidth
+    property real islandMagnifyHeight: root.defaults.islandMagnifyHeight
+    property real islandMagnifyMoveDown: root.defaults.islandMagnifyMoveDown
+     
     property real islandCompactHeight: root.defaults.islandCompactHeight
     property real islandCompactWidth: root.defaults.islandCompactWidth
     property real islandExpandedHeight: root.defaults.islandExpandedHeight
@@ -269,6 +425,7 @@ QtObject {
     property real customRadiusCard: root.defaults.customRadiusCard
     property real customRadiusControl: root.defaults.customRadiusControl
     property real customRadiusChip: root.defaults.customRadiusChip
+    property real customRadiusWindow: root.defaults.customRadiusWindow
 
     // ================= MODULE SIZING PROPERTIES =================
     property real launcherWidth: root.defaults.launcherWidth
@@ -279,6 +436,14 @@ QtObject {
 
     property real controlCenterWidth: root.defaults.controlCenterWidth
     property real controlCenterHeight: root.defaults.controlCenterHeight
+    property int controlCenterColumns: root.defaults.controlCenterColumns
+    property real controlCenterTileHeight: root.defaults.controlCenterTileHeight
+    property real controlCenterGap: root.defaults.controlCenterGap
+    property bool controlCenterShowNames: root.defaults.controlCenterShowNames
+    property bool controlCenterShowStatus: root.defaults.controlCenterShowStatus
+    property bool controlCenterShowDot: root.defaults.controlCenterShowDot
+    // Saved-settings upgrade step. SettingsStore runs each one-time migration once, then raises this.
+    property int settingsVersion: root.defaults.settingsVersion
 
     property real notificationCenterWidth: root.defaults.notificationCenterWidth
     property real notificationCenterMaxHeight: root.defaults.notificationCenterMaxHeight
@@ -315,6 +480,7 @@ QtObject {
     // ================= UPDATES =================
     property bool updateAutoCheck: root.defaults.updateAutoCheck
 
+
     // ================= NETWORK =================
     // WifiService rescans this often, but only while a Wi-Fi view is open.
     property real wifiScanIntervalSec: root.defaults.wifiScanIntervalSec
@@ -325,24 +491,25 @@ QtObject {
 
     // ================= CLOCK =================
     // Single source of truth for the bar clock AND the Clock settings preview.
+    // Which items the clock shows, and their order, live in ClockLayoutService (an item in its
+    // layout is on the bar). Only formats and looks are stored here.
     // The two format strings below are derived — never persisted, never set by hand.
     property bool clockUse24Hour: root.defaults.clockUse24Hour
     property bool clockShowSeconds: root.defaults.clockShowSeconds
     property bool clockLeadingZero: root.defaults.clockLeadingZero
     property bool clockLowercaseAmPm: root.defaults.clockLowercaseAmPm
-    property int clockDateStyle: root.defaults.clockDateStyle            // 0 = off, 1 = "ddd d", 2 = "ddd d MMM"
-    property bool clockShowVisualizer: root.defaults.clockShowVisualizer
-    property bool clockShowWorkspaces: root.defaults.clockShowWorkspaces
+    property int clockDateStyle: root.defaults.clockDateStyle            // 1 = "ddd d", 2 = "ddd d MMM" (an old saved 0 reads as 1)
     property int clockVisualizerBars: root.defaults.clockVisualizerBars
     property real clockVisualizerBarWidth: root.defaults.clockVisualizerBarWidth
     property real clockVisualizerGap: root.defaults.clockVisualizerGap
     property real clockVisualizerMaxHeight: root.defaults.clockVisualizerMaxHeight
     property real clockVisualizerSpeedPercent: root.defaults.clockVisualizerSpeedPercent
     property string clockVisualizerColor: root.defaults.clockVisualizerColor
-    property bool clockShowPrivacyIndicator: root.defaults.clockShowPrivacyIndicator
-    property bool clockShowTimerIcon: root.defaults.clockShowTimerIcon
-    property bool clockShowRecordingIndicator: root.defaults.clockShowRecordingIndicator
     property bool timerToastShowRecordingIndicator: root.defaults.timerToastShowRecordingIndicator
+    property string clockAnimation: root.defaults.clockAnimation   // "None" | "Flip"
+    property int clockFlipMs: root.defaults.clockFlipMs
+    property bool clockFlipCards: root.defaults.clockFlipCards
+    property var clockItemZones: root.defaults.clockItemZones   // always reassign (never mutate) so change signals fire
 
     // 12-hour mode always includes an AM/PM token, which is what makes h/hh
     // render as 1-12 instead of 0-23.
@@ -366,6 +533,10 @@ QtObject {
     property bool workspaceBounce: root.defaults.workspaceBounce
     property real workspaceDotSize: root.defaults.workspaceDotSize
     property real workspaceActiveWidth: root.defaults.workspaceActiveWidth
+    property bool workspaceShowWindows: root.defaults.workspaceShowWindows
+    property bool workspaceWindowsOnSpecial: root.defaults.workspaceWindowsOnSpecial
+    property int workspaceMaxWindowIcons: root.defaults.workspaceMaxWindowIcons
+    property bool workspacePerMonitor: root.defaults.workspacePerMonitor
 
     // ================= MOTION & ANIMATIONS =================
     property bool motionReduced: root.defaults.motionReduced
@@ -383,6 +554,8 @@ QtObject {
     property bool motionIconsEnabled: root.defaults.motionIconsEnabled
     property real motionIconSpeedPercent: root.defaults.motionIconSpeedPercent
     property real motionIconBouncePercent: root.defaults.motionIconBouncePercent
+    // How far the island overshoots when it grows, changes style or pops its content in.
+    property real motionIslandBouncePercent: root.defaults.motionIslandBouncePercent
 
     // ================= DISPLAY =================
     // How much the brightness keys, IPC calls and island scroll change brightness per step.
@@ -394,6 +567,7 @@ QtObject {
     property int volumeMax: root.defaults.volumeMax
     property string lyricsBackend: root.defaults.lyricsBackend            // "Auto" | "LRCLIB" | "Local files"
     property string defaultPlayer: root.defaults.defaultPlayer            // "Spotify" | "Firefox" | "mpv" | "Any"
+    property bool volumeShowPopup: root.defaults.volumeShowPopup    // the level indicator that pops up in the island
 
     // ================= LANGUAGE & REGION =================
     property string weatherUnit: root.defaults.weatherUnit                // "°C" | "°F"
@@ -423,6 +597,23 @@ QtObject {
 
     function motionOvershoot() {
         return root.motionReduced ? 1.0 : (1.0 + root.motionBouncePercent / 100)
+    }
+    
+    // OutBack overshoot for the island's own motion. 0 % gives 0, which is a plain ease-out;
+    // 40 % (the default) gives 1.2, about 5 % past the target.
+    function motionIslandOvershoot() {
+        return root.motionReduced ? 0 : root.motionIslandBouncePercent * 0.03
+    }
+    
+    // ---- Clock zones (Bar style) ----
+    function clockZoneOf(type) {
+        return root.clockItemZones[type] || "center"
+    }
+
+    function setClockZone(type, zone) {
+        const next = Object.assign({}, root.clockItemZones)
+        next[type] = zone
+        root.clockItemZones = next
     }
 
     // Generalized spring-stiffness mapping: shorter user-set duration (ms)
@@ -476,6 +667,17 @@ QtObject {
         onTriggered: root._returnFromFlash()
     }
 
+    // True for a popup that stays until clicked (shown with a duration of 0).
+    property bool _flashSticky: false
+
+    // A Detailed or Interactive popup stays up while the pointer is over it, and starts its
+    // countdown again when the pointer leaves.
+    function holdFlash(hold) {
+        if (!root._isFlashPage(root.activePage)) return
+        if (hold) flashTimer.stop()
+        else if (!root._flashSticky) flashTimer.restart()
+    }
+
     function showPage(page) {
         flashTimer.stop()
         if (!root._isFlashPage(page)) root.previousPage = page
@@ -489,6 +691,7 @@ QtObject {
     function flashPage(page) {
         if (!root._isFlashPage(root.activePage) && root.activePage !== page) root.previousPage = root.activePage
         root.activePage = page
+        root._flashSticky = false
         flashTimer.interval = 1500
         flashTimer.restart()
     }
@@ -497,6 +700,7 @@ QtObject {
     function flashPageFor(page, durationMs) {
         if (!root._isFlashPage(root.activePage) && root.activePage !== page) root.previousPage = root.activePage
         root.activePage = page
+        root._flashSticky = durationMs <= 0
         if (durationMs > 0) {
             flashTimer.interval = durationMs
             flashTimer.restart()
@@ -558,5 +762,7 @@ QtObject {
         // restored to at startup (e.g. if it was left true from a
         // previous session), rather than waiting for the next toggle.
         HyprlandAnimationsService.setEnabled(!motionReduced)
+        WindowDecorationService.signature
+        BlurService.signature
     }
 }

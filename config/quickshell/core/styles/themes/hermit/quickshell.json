@@ -1,13 +1,12 @@
 {
   "dark": {
-    "vscodeTheme": "Hermit Dark",
     "isLight": false,
     "background": "#0A0A0A",
     "foreground": "#F6F1EA",
     "fgMuted": "#8C8C8C",
-    "surface": "#202020",
+    "surface": "#1c1c1c",
     "border": "#1A2327",
-    "accent": "#88C0D0",
+    "accent": "#6fc8d5",
     "red": "#DF5B61",
     "green": "#8CCF7E",
     "yellow": "#E5C76B",
@@ -16,7 +15,6 @@
     "cyan": "#6CBFBF"
   },
   "light": {
-    "vscodeTheme": "Hermit Light",
     "isLight": true,
     "background": "#F6F1EA",
     "foreground": "#101010",
@@ -31,4 +29,4 @@
     "purple": "#C488EC",
     "cyan": "#6CBFBF"
   }
-}}
+}

@@ -1,11 +1,19 @@
 module features.bar.components
 Clock 1.0 Clock.qml
 NotificationToast 1.0 NotificationToast.qml
+NotificationPopupCard 1.0 NotificationPopupCard.qml
 RecordingIndicator 1.0 RecordingIndicator.qml
 TimerToast 1.0 TimerToast.qml
 NotchShape 1.0 NotchShape.qml
 EventToast 1.0 EventToast.qml
 Workspaces 1.0 Workspaces.qml
 ClockVisualizer 1.0 ClockVisualizer.qml
+ClockItemPreview 1.0 ClockItemPreview.qml
 PrivacyIndicator 1.0 PrivacyIndicator.qml
 AppToast 1.0 AppToast.qml
+IslandShape 1.0 IslandShape.qml
+FlipHalf 1.0 FlipHalf.qml
+FlipDigit 1.0 FlipDigit.qml
+ClockTimeText 1.0 ClockTimeText.qml
+PanelCard 1.0 PanelCard.qml
+ClockZone 1.0 ClockZone.qml

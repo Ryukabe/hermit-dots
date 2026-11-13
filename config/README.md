@@ -1,0 +1,1 @@
+# My Custom Hyprland + Quickshell Island setup.

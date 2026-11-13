@@ -2,6 +2,7 @@
 // The sidebar, the landing lists, the title bar and (later) search all read from here,
 // so adding a page means adding one entry.
 //
+//   cluster = { id, title?, menus }   (title is the small label above the group in the sidebar)
 //   menu  = { id, title, subtitle, icon, tags, placeholder?, source?, views? }
 //   view  = { id, title, subtitle, icon, tags, placeholder?, source? }
 //
@@ -9,13 +10,14 @@
 // a menu with `source` and no views is a leaf page; anything with neither shows "Coming soon".
 pragma Singleton
 import QtQuick
+import "../../../core/styles"
 
 QtObject {
     id: root
 
     readonly property string appTitle: "Settings"
     readonly property string appSubtitle: "Hermit"
-    readonly property string defaultMenuId: "bar"
+    readonly property string defaultMenuId: "home"
 
     // Shown on the About page. Change the version here and nowhere else.
     readonly property string projectName: "Hermit-dots"
@@ -24,19 +26,40 @@ QtObject {
 
     readonly property var clusters: [
         {
+            id: "home",
+            menus: [
+                { id: "home", title: "Home", subtitle: "Quick links to common settings", icon: "home",
+                  tags: "home start overview quick links shortcuts",
+                  source: "pages/home/HomeSettings.qml" }
+            ]
+        },
+        {
             id: "shell",
+            title: "Shell",
             menus: [
                 {
-                    id: "bar", title: "Bar & Island", subtitle: "Shape, size and behaviour of the island", icon: "dock_to_bottom",
-                    tags: "top margin corner radius border notch flare height width collapsed expanded hover lift click outside dismiss persistent show on hover drag threshold scroll gestures",
+                    id: "bar", title: "Bar", subtitle: "Style, clock items and size of the island", icon: "dock_to_bottom",
+                    tags: "island notch style top margin border flare height width collapsed expanded clock layout items chips add remove order move workspaces visualizer timer icon mic camera privacy recording dot click item card quick options 24 hour seconds date style bars color count dots capsule",
                     source: "../bar/BarSettings.qml",
                     views: [
                         { id: "workspaces", title: "Workspaces", subtitle: "Indicators and window icons", icon: "grid_view",
-                          tags: "workspace shown active indicator trail occupied windows special per-monitor",
+                          tags: "workspace workspaces shown count dots capsule active indicator trail occupied windows special per-monitor",
                           source: "../bar/WorkspacesSettings.qml" },
-                        { id: "clock", title: "Clock", subtitle: "Time, date and bar indicators", icon: "schedule",
-                          tags: "time date seconds leading zero am pm visualizer timer icon recording indicator preview",
-                          source: "../bar/ClockSettings.qml" }
+                        { id: "clock", title: "Clock", subtitle: "Time and date format", icon: "schedule",
+                          tags: "time date format seconds leading zero am pm 24 hour short long timer toast recording",
+                          source: "../bar/ClockSettings.qml" },
+                        { id: "visualizer", title: "Visualizer", subtitle: "Bars, speed and color", icon: "equalizer",
+                          tags: "visualizer music audio bars width gap height speed color preview",
+                          source: "../bar/VisualizerSettings.qml" },
+                        { id: "behavior", title: "Behavior", subtitle: "Visibility, hover and scroll", icon: "tune",
+                          tags: "persistent always visible show on hover reveal zone hide delay click outside dismiss scroll gestures volume brightness",
+                          source: "../bar/BehaviorSettings.qml" },
+                        { id: "hoverpanel", title: "Hover panel", subtitle: "The panel that opens when you rest the pointer", icon: "preview",
+                          tags: "hover panel rest pointer delay close hint width date time volume brightness notifications timer quick actions dwell",
+                          source: "../hoverpanel/HoverPanelSettings.qml" },  
+                        { id: "advanced", title: "Advanced", subtitle: "Minimum size of open panels", icon: "build",
+                          tags: "expanded height floor minimum width panel size advanced",
+                          source: "../bar/BarAdvancedSettings.qml" }
                     ]
                 },
                 {
@@ -48,32 +71,41 @@ QtObject {
                           source: "../dashboard/DashboardSettings.qml" },
                         { id: "quicknote", title: "Quick note", subtitle: "Markdown note editor", icon: "edit_note",
                           tags: "note markdown toolbar bold italic heading bullet numbered list text size file save",
-                          source: "../dashboard/DashboardQuickNoteSettings.qml" },
+                          source: "../dashboard/QuickNoteSettings.qml" },
                         { id: "media", title: "Media", subtitle: "CD player card", icon: "album",
                           tags: "cd disc spin rotation cover blur background controls artist player",
-                          source: "../dashboard/DashboardMediaSettings.qml" },
+                          source: "../dashboard/MediaSettings.qml" },
                         { id: "stats", title: "System stats", subtitle: "Rows, graphs and update rate", icon: "monitoring",
                           tags: "cpu gpu memory ram network battery temperature graph history update interval",
-                          source: "../dashboard/DashboardStatsSettings.qml" },
+                          source: "../dashboard/SystemStatsSettings.qml" },
                         { id: "calendar", title: "Calendar", subtitle: "Month view options", icon: "calendar_month",
                           tags: "calendar month week start sunday monday saturday days outside",
-                          source: "../dashboard/DashboardCalendarSettings.qml" }
+                          source: "../dashboard/CalendarSettings.qml" }
                     ]
                 },
                 {
                     id: "launcher", title: "Launcher", subtitle: "App search, tools and clipboard", icon: "rocket_launch",
                     tags: "app search width rows results match fuzzy prefix recent apps icons animate shrink preset",
-                    source: "../launcher/LauncherPage.qml",
+                    source: "../launcher/LauncherSettings.qml",
                     views: [
                         { id: "searchtools", title: "Search tools", subtitle: "Calculator, web, files and quick pickers", icon: "bolt",
-                          tags: "calculator units web search commands files system emoji snippets notes trigger prefix",
-                          source: "../launcher/SearchToolsPage.qml" },
+                          tags: "calculator units web search commands files system emoji snippets notes",
+                          source: "../launcher/SearchToolsSettings.qml" },
+                        { id: "aliasespinned", title: "Aliases & pinned", subtitle: "Short names for apps and apps kept on top", icon: "push_pin",
+                          tags: "alias aliases shortcut word pinned pin apps first favourite empty search",
+                          source: "../launcher/AliasesPinnedSettings.qml" },
+                        { id: "searchengines", title: "Search engines", subtitle: "Keywords for web search", icon: "travel_explore",
+                          tags: "search engines web keyword google duckduckgo youtube github wikipedia default address url",
+                          source: "../launcher/SearchEnginesSettings.qml" },
                         { id: "clipboard", title: "Clipboard", subtitle: "History and panel size", icon: "content_paste",
                           tags: "clipboard history cliphist entries width rows",
-                          source: "../clipboard/ClipboardPage.qml" },
+                          source: "../clipboard/ClipboardSettings.qml" },
                         { id: "notessnippets", title: "Notes & snippets", subtitle: "Where they are saved", icon: "edit_note",
-                          tags: "quick notes snippets folder file json aliases pinned search engines storage",
-                          source: "../launcher/NotesSnippetsPage.qml" }
+                          tags: "quick notes snippets folder file storage",
+                          source: "../launcher/NotesSnippetsSettings.qml" },
+                        { id: "advanced", title: "Advanced", subtitle: "Result limits, icon theme and trigger marks", icon: "build",
+                          tags: "maximum results recent apps remember icon theme trigger mark emoji snippets notes character advanced",
+                          source: "../launcher/LauncherAdvancedSettings.qml" }
                     ]
                 },
                 { id: "controlcenter", title: "Control Center", subtitle: "Tiles and layout", icon: "widgets",
@@ -82,17 +114,18 @@ QtObject {
                 {
                   id: "lockscreen", title: "Lock Screen", subtitle: "Look and unlock behaviour", icon: "lock",
                   tags: "pam password security idle lid clock blur dim username hint text nav actions reboot power hyprland notifications wallpaper preview folder weather city temperature celsius fahrenheit forecast hourly feels like media now playing album art progress cover hide track",
-                  source: "../lockscreen/LockScreenPage.qml",
+                  source: "../lockscreen/LockScreenSettings.qml",
                   views: [
                       { id: "knowledge", title: "Knowledge", subtitle: "Facts and words on the lock screen", icon: "lightbulb",
                         tags: "fact word meaning vocabulary slide interesting did you know learn",
-                        source: "../lockscreen/KnowledgePage.qml" }
+                        source: "../lockscreen/KnowledgeSettings.qml" }
                   ]
                 },
             ]
         },
         {
             id: "devices",
+            title: "Devices",
             menus: [
                 {
                     id: "network", title: "Wi-Fi & Bluetooth", subtitle: "Networks and paired devices", icon: "wifi",
@@ -100,16 +133,16 @@ QtObject {
                     views: [
                         { id: "wifi", title: "Wi-Fi", subtitle: "Networks and connections", icon: "wifi",
                           tags: "wifi wireless network password connect scan metered airplane",
-                          source: "../network/WifiPage.qml" },
+                          source: "../network/WifiSettings.qml" },
                         { id: "bluetooth", title: "Bluetooth", subtitle: "Paired and nearby devices", icon: "bluetooth",
                           tags: "bluetooth pair device headphones battery discoverable",
-                          source: "../network/BluetoothPage.qml" }
+                          source: "../network/BluetoothSettings.qml" }
                     ]
                 },
                 { id: "soundmedia", title: "Sound & Media", subtitle: "Volume, outputs and players", icon: "graphic_eq",
                   tags: "volume output mpris visualizer step max lyrics source backend preferred default player",
                   source: "../sound/SoundMediaSettings.qml" },
-                { id: "display", title: "Displays", subtitle: "Monitors and scaling", icon: "desktop_windows",
+                { id: "display", title: "Display", subtitle: "Monitors and scaling", icon: "desktop_windows",
                   tags: "resolution refresh rate scale transparency monitor",
                   source: "../display/DisplaySettings.qml" },
                 { id: "trackpadmouse", title: "Trackpad & Mouse", subtitle: "Pointer, tap and scroll", icon: "mouse",
@@ -118,47 +151,53 @@ QtObject {
                 {
                     id: "keybinds", title: "Keybinds", subtitle: "Hyprland and shell shortcuts", icon: "keyboard",
                     tags: "keyboard shortcuts hyprland binds hotkeys rebind modifier super add custom conflict",
-                    source: "../hyprland/KeybindsPage.qml",
+                    source: "../hyprland/KeybindsSettings.qml",
                     views: [
                         { id: "windows", title: "Windows", subtitle: "Windows, workspaces and layout", icon: "window",
                           tags: "hyprland window workspace move focus tile float fullscreen close",
                           category: "Hyprland",
-                          source: "../hyprland/KeybindListPage.qml" },
+                          source: "../hyprland/KeybindListSettings.qml" },
                         { id: "shell", title: "Shell", subtitle: "Launcher, panels and the island", icon: "dock_to_bottom",
                           tags: "quickshell launcher control center power menu clipboard settings island",
                           category: "Quickshell",
-                          source: "../hyprland/KeybindListPage.qml" },
+                          source: "../hyprland/KeybindListSettings.qml" },
                         { id: "mediasystem", title: "Media & system", subtitle: "Volume, brightness and screenshots", icon: "perm_media",
                           tags: "media volume brightness screenshot play pause next previous lock",
                           category: "Media & System",
-                          source: "../hyprland/KeybindListPage.qml" }
+                          source: "../hyprland/KeybindListSettings.qml" }
                     ]
                 },
             ]
         },
         {
             id: "looks",
+            title: "Personalization",
             menus: [
                 {
-                    id: "appearance", title: "Appearance", subtitle: "Wallpaper, theme, type and motion", icon: "palette",
-                    tags: "theme fonts color dark mode accent wallpaper",
+                    id: "appearance", title: "Appearance", subtitle: "Theme, mode, wallpaper, type and motion", icon: "palette",
+                    tags: "theme picker card preset fonts color dark light auto mode schedule sunrise sunset accent wallpaper",
+                    source: "../theme/AppearanceSettings.qml",
                     views: [
                         { id: "wallpaper", title: "Wallpaper", subtitle: "Background image and rotation", icon: "wallpaper",
                           tags: "background image slideshow",
                           source: "../theme/WallpaperSettings.qml" },
-                        // Theme and Colors used to be two separate views; they are one page now.
-                        { id: "theme", title: "Theme", subtitle: "Theme, colors and palette overrides", icon: "format_paint",
-                          tags: "theme card preset changer colors palette accent override theme tracking light dark",
-                          source: "../theme/ThemeSettings.qml" },
+                        { id: "theme", title: "Colors", subtitle: "Custom palette colors", icon: "format_paint",
+                          tags: "colors custom accent override hex dark light",
+                          requires: "customPalette",
+                          source: "../theme/ColorsSettings.qml" },
                         { id: "typography", title: "Typography", subtitle: "Fonts, size and icon style", icon: "text_fields",
                           tags: "fonts size icons weight",
                           source: "../theme/TypographySettings.qml" },
                         { id: "motion", title: "Motion", subtitle: "Speed, bounce and Hyprland animations", icon: "speed",
                           tags: "animations physics springs reduce bounce hyprland",
                           source: "../theme/MotionSettings.qml" },
-                        { id: "opacity", title: "Opacity", subtitle: "Mica, spacing and shadows", icon: "opacity",
-                          tags: "mica transparency shadow depth",
-                          source: "../theme/OpacitySettings.qml" },
+                        // Corners, mica and shadow share one page. The id stays "opacity" so nothing that links here breaks.
+                        { id: "opacity", title: "Surfaces", subtitle: "Corners, opacity, blur and shadows", icon: "opacity",
+                          tags: "corner radius round universal island card control chip mica transparency opacity window windows active inactive fullscreen shadow depth blur",
+                          source: "../theme/SurfacesSettings.qml" },
+                        { id: "windows", title: "Windows", subtitle: "Gaps, shadow and corner shape", icon: "web_asset",
+                          tags: "windows hyprland gaps inner outer spacing border size corner shape rounding power squircle circle dim dimming shadow range sharpness scale",
+                          source: "../theme/WindowsSettings.qml" },
                         { id: "templates", title: "Templates", subtitle: "Re-theme other apps when your theme changes", icon: "dashboard_customize",
                           tags: "templates apps gtk qt kitty terminal vscode hyprland sync colors adapters",
                           source: "../theme/TemplatesSettings.qml" },
@@ -168,7 +207,11 @@ QtObject {
         },
         {
             id: "system",
+            title: "System",
             menus: [
+                { id: "account", title: "Accounts", subtitle: "Users, passwords and names", icon: "manage_accounts",
+                  tags: "user users account accounts password login username display name full name add create new remove delete administrator admin sudo wheel sddm",
+                  source: "../account/AccountsSettings.qml" },
                 {
                     id: "apps", title: "Apps", subtitle: "Defaults, startup and app library", icon: "apps",
                     tags: "default applications terminal browser file manager favourites hidden startup autostart",
@@ -199,10 +242,10 @@ QtObject {
                 },
                 { id: "language", title: "Language & Region", subtitle: "Language, units and clock format", icon: "language",
                   tags: "locale language clock 12 24 hour temperature units weather location",
-                  source: "pages/language/LanguageSettings.qml" },
+                  source: "pages/language/LanguageRegionSettings.qml" },
                 { id: "about", title: "About", subtitle: "This setup, system and updates", icon: "info",
                   tags: "hardware info updates hermit version license credits cpu gpu kernel power profile reset",
-                  source: "pages/about/About.qml" }
+                  source: "pages/about/AboutSettings.qml" }
             ]
         }
     ]
@@ -224,5 +267,12 @@ QtObject {
             if (menu.views[v].id === viewId) return menu.views[v]
         }
         return null
+    }
+
+    // Views can carry `requires`; anything without it is always shown.
+    function isViewVisible(view) {
+        if (!view) return false
+        if (view.requires === "customPalette") return Colors.paletteSource === "Custom"
+        return true
     }
 }

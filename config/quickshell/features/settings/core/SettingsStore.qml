@@ -14,6 +14,10 @@ Item {
     property bool _loaded: false
     property bool _applying: false
 
+    // True once the saved settings have been read. Anything that has to wait for them listens for settingsLoaded().
+    readonly property bool ready: root._loaded
+    signal settingsLoaded()
+
     function _defaults() {
         return JSON.parse(JSON.stringify(ShellState.defaults))
     }
@@ -22,9 +26,9 @@ Item {
     // button reset just its own keys instead of nuking Motion/Clock/Typography too.
     readonly property var barKeys: [
         "islandTopMargin", "islandCornerRadius", "islandBorderWidth",
-        "islandClickOutsideDismiss", "islandNotchMode", "islandNotchFlare",
+        "islandClickOutsideDismiss", "islandStyle", "islandNotchFlare",
         "islandHoverScale", "radiusUniversal", "customRadiusCard",
-        "customRadiusControl", "customRadiusChip",
+        "customRadiusControl", "customRadiusChip", "customRadiusWindow",
         "islandCompactHeight", "islandCompactWidth",
         "islandExpandedHeight", "islandMinExpandedWidth",
         "islandAlwaysVisible", "islandRevealOnHover", "islandRevealZone",
@@ -38,6 +42,9 @@ Item {
     ]
 
     function _applyToShellState(obj) {
+        // One-time migration: the old on/off key islandNotchMode became the three-way islandStyle.
+        if (obj.islandStyle === undefined && obj.islandNotchMode === true)
+            obj = Object.assign({}, obj, { islandStyle: "Notch" })
         root._applying = true
         const defaults = root._defaults()
         for (let key in defaults) {
@@ -96,14 +103,41 @@ Item {
                 root._applyToShellState(root._defaults())
             }
             root._loaded = true
+            root._migrate()
+            root.settingsLoaded()
         }
 
         // First run: no file yet. Keep ShellState's defaults and start saving.
         onLoadFailed: (error) => {
             root._applyToShellState(root._defaults())
             root._loaded = true
+            root._migrate()
+            root.settingsLoaded()
         }
     }
+
+    // One-time upgrades of saved values. settingsVersion remembers how far this file got, so each step runs once.
+    // The launcher's width is migrated in LauncherState (it also had a preset), so it is not listed here.
+    function _migrate() {
+        let v = ShellState.settingsVersion
+        const floor = ShellState.islandMinExpandedWidth
+
+        function keep(key) {
+            ShellState[key] = Math.round(Math.max(ShellState[key], floor) / 10) * 10
+        }
+
+        if (v < 1) {
+            keep("clipboardWidth")
+            v = 1
+        }
+
+        if (v < 2) {
+            keep("controlCenterWidth")
+            v = 2
+        }
+
+        ShellState.settingsVersion = v
+    }  
 
     Timer {
         id: saveTimer

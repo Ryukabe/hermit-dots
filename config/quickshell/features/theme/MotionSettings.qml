@@ -1,5 +1,7 @@
 // features/theme/MotionSettings.qml — Appearance > Motion.
 // Every control binds straight to ShellState (the single source of truth); SettingsStore persists it.
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
 import "../settings/components"
@@ -56,6 +58,21 @@ PageScroll {
         }
     }
 
+    SectionLabel { text: "Island" }
+
+    GroupCard {
+        SliderRow {
+            label: "Island bounce"
+            description: "How far the island overshoots when it grows, changes style or opens a page. 0 % is none"
+            from: 0; to: 100; stepSize: 5
+            value: ShellState.motionIslandBouncePercent
+            unit: " %"
+            enabled: !ShellState.motionReduced
+            onMoved: (val) => ShellState.motionIslandBouncePercent = val
+            showDivider: false
+        }
+    }
+
     SectionLabel { text: "Icons" }
 
     GroupCard {
@@ -94,7 +111,7 @@ PageScroll {
     GroupCard {
         SliderRow {
             label: "Movement"
-            description: "Panel resizes, page swaps and card selection"
+            description: "Island resizes and style changes, panel resizes, page swaps and card selection"
             from: 100; to: 800; stepSize: 10
             value: ShellState.motionMovementMs
             unit: " ms"
@@ -124,19 +141,19 @@ PageScroll {
         }
     }
 
-    SectionLabel { text: "Bounce" }
+    SectionLabel { text: "Spring physics (other panels)" }
 
     GroupCard {
         ToggleRow {
             label: "Spring physics"
-            description: "Experimental. Lets movement overshoot and settle"
+            description: "Experimental. Lets panels other than the island overshoot and settle. The island has its own bounce above"
             checked: ShellState.motionSpringEnabled
             onToggled: (val) => ShellState.motionSpringEnabled = val
         }
 
         SliderRow {
             label: "Bounce amount"
-            description: "Everyday movement: island resizes, hover and selection. Needs spring physics"
+            description: "Hover and selection outside the island. Needs spring physics"
             from: 0; to: 100; stepSize: 1
             value: ShellState.motionBouncePercent
             unit: " %"
@@ -146,7 +163,7 @@ PageScroll {
 
         SliderRow {
             label: "Playful bounce"
-            description: "Page pop-ins and other rare, playful moments. Needs spring physics"
+            description: "Rare, playful moments outside the island. Needs spring physics"
             from: 0; to: 100; stepSize: 1
             value: ShellState.motionExpressiveBouncePercent
             unit: " %"

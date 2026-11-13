@@ -1,5 +1,5 @@
 // core/SettingsNav.qml — where the user currently is: a menu, and optionally a view inside it.
-// No breadcrumbs: a view just shows its own title plus a back arrow.
+// `crumbs` feeds the breadcrumb header: ["Menu"] on a menu page, ["Menu", "View"] inside a view.
 pragma Singleton
 import QtQuick
 
@@ -9,6 +9,14 @@ QtObject {
     property string menuId: SettingsRegistry.defaultMenuId
     property string viewId: ""
 
+    // True right after back(): the page being returned to restores its scroll position (and, for the
+    // Bar page, its selected item). Any other navigation clears it; the host also clears it shortly
+    // after the page has loaded.
+    property bool returning: false
+
+    // Scroll position of pages the user has left, by "menu/view". Kept for the session, not saved.
+    property var scrollMemory: ({})
+
     readonly property var menu: SettingsRegistry.findMenu(root.menuId)
     readonly property var view: root.viewId !== "" ? SettingsRegistry.findView(root.menuId, root.viewId) : null
     readonly property bool canGoBack: root.view !== null
@@ -17,32 +25,43 @@ QtObject {
     readonly property string subtitle: root.view ? root.view.subtitle : (root.menu ? root.menu.subtitle : "")
     readonly property string icon: root.view ? root.view.icon : (root.menu ? root.menu.icon : "")
 
+    readonly property var crumbs: {
+        if (root.view && root.menu) return [root.menu.title, root.view.title]
+        if (root.menu) return [root.menu.title]
+        return []
+    }
+
     // Path (relative to SettingsApp.qml) of the page the host should load.
     // A menu with its own `source` shows that page even when it also has views; the page itself
     // embeds a ViewList to reach them. A menu with only views shows the plain landing list.
     readonly property string pageSource: {
         if (root.view) {
-            return root.view.source ? root.view.source : "components/PlaceholderPage.qml"
+            return root.view.source ? root.view.source : "components/PlaceholderSettings.qml"
         }
         if (root.menu) {
             if (root.menu.source) return root.menu.source
-            if (root.menu.views && root.menu.views.length > 0) return "components/LandingPage.qml"
+            if (root.menu.views && root.menu.views.length > 0) return "components/LandingSettings.qml"
         }
-        return "components/PlaceholderPage.qml"
+        return "components/PlaceholderSettings.qml"
     }
 
     function openMenu(id) {
+        root.returning = false
         root.viewId = ""
         root.menuId = id
     }
 
     function openView(menuId, viewId) {
+        root.returning = false
         root.menuId = menuId
         root.viewId = viewId
     }
 
     function back() {
-        if (root.viewId !== "") root.viewId = ""
+        if (root.viewId !== "") {
+            root.returning = true
+            root.viewId = ""
+        }
     }
 
     // Used by `qs ipc call settings section <name>`; accepts "menu" or "menu/view".
@@ -67,6 +86,7 @@ QtObject {
                     if (viewQuery !== "" && menu.views) {
                         for (let v = 0; v < menu.views.length; v++) {
                             const view = menu.views[v]
+                            if (!SettingsRegistry.isViewVisible(view)) continue
                             if (view.id === viewQuery || view.title.toLowerCase().includes(viewQuery)) {
                                 root.openView(menu.id, view.id)
                                 break

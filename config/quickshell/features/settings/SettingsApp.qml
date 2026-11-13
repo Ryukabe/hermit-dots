@@ -7,6 +7,7 @@ import Quickshell.Io
 import "core"
 import "components"
 import "pages/about"
+import "../account"
 import "../hyprland"
 import "../theme"
 import "../../core/shell"
@@ -18,6 +19,20 @@ Scope {
     // Reading SettingsStore here creates it at shell start, so saved settings are applied
     // even before any page that uses the store is opened (pages load lazily).
     readonly property bool storeLoaded: SettingsStore._loaded
+
+    // ── Profile card ───────────────────────────────────────────
+    readonly property var _me: AccountService.findUser(AccountService.currentUser)
+    readonly property string displayName: (root._me && root._me.fullName !== "")
+                                          ? root._me.fullName : AccountService.currentUser
+    property string hostName: ""
+
+    Process {
+        command: ["hostname"]
+        running: true
+        stdout: StdioCollector {
+            onStreamFinished: root.hostName = text.trim()
+        }
+    }
 
     // ── Shell-wide services ────────────────────────────────────
     // They live here (not in the About page) so update checks keep running while Settings is
@@ -60,10 +75,10 @@ Scope {
         onVisibleChanged: {
             if (visible) {
                 focusDelay.start()
-                gearIcon.play()
                 searchIndex.rebuild()
                 IconThemeService.refreshThemes()
                 LayoutSettingsService.refresh()
+                AccountService.refresh()
             }
         }
 
@@ -82,6 +97,12 @@ Scope {
             // Title of the option picked in search; scrolled to and flashed once its page is up.
             property string pendingOption: ""
 
+            // ── Remembering the scroll position ────────────────
+            // The scroller of the page now showing, and the key ("menu/view") its position is saved under.
+            // Going back to a page restores where it was; the page itself is rebuilt from scratch.
+            property var activeFlick: null
+            property string activeFlickKey: ""
+
             // Retries a few times because the page loads a moment after the navigation.
             Timer {
                 id: jumpTimer
@@ -96,6 +117,45 @@ Scope {
                     if (attempts < 8) restart()
                     else contentRoot.pendingOption = ""
                 }
+            }
+
+            // Saves the position as the page scrolls.
+            Connections {
+                target: contentRoot.activeFlick
+                ignoreUnknownSignals: true
+
+                function onContentYChanged() {
+                    if (contentRoot.activeFlickKey !== "" && contentRoot.activeFlick)
+                        SettingsNav.scrollMemory[contentRoot.activeFlickKey] = contentRoot.activeFlick.contentY
+                }
+            }
+
+            // Puts the saved position back once the page is tall enough to reach it (its content
+            // lays out over a few frames).
+            Timer {
+                id: restoreTimer
+                interval: 40
+                property var flick: null
+                property real target: 0
+                property int attempts: 0
+                onTriggered: {
+                    if (!flick) return
+                    const maxY = Math.max(0, flick.contentHeight - flick.height)
+                    attempts++
+                    if (maxY >= target - 1 || attempts >= 10) {
+                        flick.contentY = Math.min(target, maxY)
+                        return
+                    }
+                    restart()
+                }
+            }
+
+            // Clears the "returning" flag a moment after the page has loaded, so the page itself
+            // (which reads it while it is being built) still sees it.
+            Timer {
+                id: returnTimer
+                interval: 400
+                onTriggered: SettingsNav.returning = false
             }
 
             NumberAnimation {
@@ -170,6 +230,20 @@ Scope {
                 return true
             }
 
+            // The scroller of a page: the one a PageScroll exposes, else the first Flickable inside it.
+            function findFlickable(node) {
+                if (!node) return null
+                if ("flickable" in node && node.flickable) return node.flickable
+                if (node.contentY !== undefined && node.contentHeight !== undefined) return node
+                const kids = node.children
+                if (!kids) return null
+                for (let i = 0; i < kids.length; i++) {
+                    const r = contentRoot.findFlickable(kids[i])
+                    if (r) return r
+                }
+                return null
+            }
+
             // Hands a shared service to the page if the page declares a property with that name.
             function inject(page, name, value) {
                 if (name in page) page[name] = value
@@ -184,10 +258,22 @@ Scope {
                 }
             }
 
-            // Ctrl+F focuses search. Escape steps back out of a view first, then closes the window.
+            // The mouse's back button steps out of a view.
+            TapHandler {
+                acceptedButtons: Qt.BackButton
+                onTapped: { if (SettingsNav.canGoBack) SettingsNav.back() }
+            }
+
+            // Ctrl+F focuses search. Escape and Alt+Left step back out of a view first
+            // (Escape then closes the window).
             Keys.onPressed: (event) => {
                 if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_F) {
                     searchBox.forceActiveFocus()
+                    event.accepted = true
+                    return
+                }
+                if ((event.modifiers & Qt.AltModifier) && event.key === Qt.Key_Left) {
+                    if (SettingsNav.canGoBack) SettingsNav.back()
                     event.accepted = true
                     return
                 }
@@ -213,59 +299,75 @@ Scope {
                         anchors.margins: Dimens.paddingMedium
                         spacing: Dimens.spacingMedium
 
-                        // Header: gear + app title
-                        RowLayout {
+                        // Profile card: who is signed in; opens Accounts.
+                        Item {
+                            id: profileCard
                             Layout.fillWidth: true
-                            spacing: Dimens.spacingSmall
+                            implicitHeight: 64
 
                             Rectangle {
-                                Layout.preferredWidth: 40
-                                Layout.preferredHeight: 40
-                                radius: 20
-                                color: gearMouse.containsMouse ? Colors.elevatedBg : "transparent"
+                                anchors.fill: parent
+                                radius: Dimens.settingsContainerRadius
+                                color: profileMouse.containsMouse ? Colors.elevatedBg : "transparent"
 
                                 Behavior on color {
                                     ColorAnimation { duration: ShellState.motionDuration(Motion.hoverMs) }
                                 }
+                            }
 
-                                // The gear turns when Settings opens, on hover and on click.
-                                SymbolIcon {
-                                    id: gearIcon
-                                    anchors.centerIn: parent
-                                    name: "settings"
-                                    size: Dimens.fontSizeLg
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: Dimens.paddingSmall
+                                anchors.rightMargin: Dimens.paddingSmall
+                                spacing: Dimens.spacingMedium
+
+                                Rectangle {
+                                    Layout.preferredWidth: 44
+                                    Layout.preferredHeight: 44
+                                    radius: 22
                                     color: Colors.accent
-                                    animated: true
-                                    hovered: gearMouse.containsMouse
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: root.displayName.length > 0 ? root.displayName.charAt(0).toUpperCase() : "?"
+                                        color: Colors.bg
+                                        font.family: Fonts.display
+                                        font.pixelSize: Dimens.fontSizeXl
+                                        font.weight: Font.Bold
+                                    }
                                 }
 
-                                MouseArea {
-                                    id: gearMouse
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: gearIcon.play()
+                                ColumnLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 0
+
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: root.displayName
+                                        color: Colors.fg
+                                        font.family: Fonts.text
+                                        font.pixelSize: Dimens.fontSizeBase
+                                        font.weight: Font.DemiBold
+                                        elide: Text.ElideRight
+                                    }
+
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: root.hostName !== "" ? root.hostName : "@" + AccountService.currentUser
+                                        color: Colors.subtext
+                                        font.family: Fonts.text
+                                        font.pixelSize: Dimens.fontSizeXs
+                                        elide: Text.ElideRight
+                                    }
                                 }
                             }
 
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                spacing: 0
-
-                                Text {
-                                    text: SettingsRegistry.appTitle
-                                    color: Colors.fg
-                                    font.family: Fonts.display
-                                    font.pixelSize: Dimens.fontSizeLg
-                                    font.weight: Font.Bold
-                                }
-
-                                Text {
-                                    text: SettingsRegistry.appSubtitle
-                                    color: Colors.subtext
-                                    font.family: Fonts.text
-                                    font.pixelSize: Dimens.fontSizeXs
-                                }
+                            MouseArea {
+                                id: profileMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: SettingsNav.openMenu("account")
                             }
                         }
 
@@ -311,6 +413,20 @@ Scope {
                                         Layout.fillWidth: true
                                         spacing: 3
 
+                                        // Small group label (clusters without a title get none).
+                                        Text {
+                                            visible: !!cluster.modelData.title
+                                            Layout.fillWidth: true
+                                            Layout.leftMargin: Dimens.paddingMedium
+                                            Layout.bottomMargin: 2
+                                            text: cluster.modelData.title ? cluster.modelData.title : ""
+                                            color: Colors.subtext
+                                            font.family: Fonts.text
+                                            font.pixelSize: Dimens.fontSizeXs
+                                            font.weight: Font.DemiBold
+                                            elide: Text.ElideRight
+                                        }
+
                                         Repeater {
                                             model: cluster.modelData.menus
 
@@ -319,7 +435,6 @@ Scope {
 
                                                 icon: modelData.icon
                                                 title: modelData.title
-                                                subtitle: modelData.subtitle
                                                 selected: SettingsNav.menuId === modelData.id
                                                 onClicked: SettingsNav.openMenu(modelData.id)
                                             }
@@ -357,8 +472,13 @@ Scope {
                             icon: SettingsNav.icon
                             title: SettingsNav.title
                             subtitle: SettingsNav.subtitle
+                            crumbs: SettingsNav.crumbs
                             canGoBack: SettingsNav.canGoBack
                             onBackClicked: SettingsNav.back()
+                            // Only the menu crumb can be clicked, and it is the one before the view.
+                            onCrumbClicked: (index) => {
+                                if (index < SettingsNav.crumbs.length - 1) SettingsNav.back()
+                            }
                         }
 
                         Loader {
@@ -377,6 +497,23 @@ Scope {
                                 // Pages that declare these properties receive the shared services.
                                 contentRoot.inject(page, "updateService", updateService)
                                 contentRoot.inject(page, "systemInfo", systemInfo)
+
+                                // Track this page's scroller; coming back to a page restores its position
+                                // (but a jump from search scrolls to its option instead).
+                                const fl = contentRoot.findFlickable(page)
+                                const key = SettingsNav.menuId + "/" + SettingsNav.viewId
+                                contentRoot.activeFlickKey = key
+                                contentRoot.activeFlick = fl
+                                const saved = SettingsNav.scrollMemory[key]
+                                if (fl && SettingsNav.returning && contentRoot.pendingOption === ""
+                                        && saved !== undefined && saved > 0) {
+                                    restoreTimer.flick = fl
+                                    restoreTimer.target = saved
+                                    restoreTimer.attempts = 0
+                                    restoreTimer.restart()
+                                }
+                                returnTimer.restart()
+
                                 loadFade.restart()
                             }
 

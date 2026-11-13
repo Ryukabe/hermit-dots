@@ -1,16 +1,13 @@
-// pages/focusnotifications/ToastsSettings.qml — Focus & Notifications > Toasts.
+// features/notifications/ToastsSettings.qml — Focus & Notifications > Toasts.
 // Everything here is bound to ShellState and read by the island / EventToastService /
-// AppLaunchToastService.
+// AppLaunchToastService / the timer toast.
 import QtQuick
-import QtQuick.Layouts
 import "../settings/components"
-import "../bar"
-import "."
 import "../../core/shell"
-import "../../core/styles"
 
 PageScroll {
     id: root
+
 
     SectionLabel { text: "Pop-ups" }
 
@@ -83,6 +80,18 @@ PageScroll {
             label: "Audio input changes"
             checked: ShellState.eventToastAudioInput
             onToggled: (val) => ShellState.eventToastAudioInput = val
+            showDivider: false
+        }
+    }
+
+    SectionLabel { text: "Timer toast" }
+
+    GroupCard {
+        ToggleRow {
+            label: "Recording indicator"
+            description: "Recording dot inside the timer toast"
+            checked: ShellState.timerToastShowRecordingIndicator
+            onToggled: (val) => ShellState.timerToastShowRecordingIndicator = val
             showDivider: false
         }
     }

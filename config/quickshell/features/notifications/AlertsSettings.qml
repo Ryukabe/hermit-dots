@@ -1,11 +1,9 @@
-// pages/focusnotifications/AlertsSettings.qml — Focus & Notifications > Alerts.
+// features/notifications/AlertsSettings.qml — Focus & Notifications > Alerts.
 // Everything here is bound to ShellState and read by NotificationService / NotificationCenter.
 import QtQuick
-import QtQuick.Layouts
 import "../settings/components"
 import "."
 import "../../core/shell"
-import "../../core/styles"
 
 PageScroll {
     id: root
@@ -40,6 +38,44 @@ PageScroll {
                 onToggled: (val) => ShellState.notificationRespectAppTimeout = val
                 showDivider: false
             }
+        }
+    }
+
+    SectionLabel { text: "Sound" }
+
+    GroupCard {
+        SegmentRow {
+            label: "Notification sound"
+            description: ShellState.notificationSoundMode === "Off"
+                ? "Notifications are silent"
+                : (ShellState.notificationSoundMode === "Default"
+                    ? "The system's new message sound"
+                    : "Your own sound file")
+            options: ["Off", "Default", "Custom"]
+            selectedValue: ShellState.notificationSoundMode
+            onOptionSelected: (name) => ShellState.notificationSoundMode = name
+        }
+
+        Reveal {
+            shown: ShellState.notificationSoundMode === "Custom"
+
+            TextRow {
+                label: "Sound file"
+                description: "Full path to a .wav, .ogg, .flac, .mp3 or .m4a file. Empty plays the default sound"
+                value: ShellState.notificationSoundFile
+                fieldWidth: 280
+                monospace: true
+                onCommitted: (v) => ShellState.notificationSoundFile = v.trim()
+            }
+        }
+
+        ButtonRow {
+            label: "Test sound"
+            description: "Plays the sound as it is set now"
+            buttonText: "Play"
+            enabled: ShellState.notificationSoundMode !== "Off"
+            showDivider: false
+            onClicked: NotificationService.playSound(true)
         }
     }
 
@@ -116,7 +152,7 @@ PageScroll {
                 required property int index
 
                 label: modelData
-                description: index === 0 ? "Muted apps show no popup but stay in the notification center" : ""
+                description: index === 0 ? "Muted apps show no popup and play no sound, but stay in the notification center" : ""
                 checked: NotificationService.isMuted(modelData)
                 onToggled: (val) => NotificationService.setMuted(modelData, val)
                 showDivider: index < NotificationService.appNames.length - 1

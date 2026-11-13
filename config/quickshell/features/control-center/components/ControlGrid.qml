@@ -17,13 +17,13 @@ Item {
     readonly property int columns: ControlCenterLayoutService.columns
     readonly property real gap: ControlCenterLayoutService.cellSpacing
     readonly property real cellW: (width - (columns - 1) * gap) / columns
-    readonly property real cellH: 68
+    readonly property real cellH: ShellState.controlCenterTileHeight
     readonly property real stepX: cellW + gap
     readonly property real stepY: cellH + gap
     // In edit mode one spare row is shown so a tile can be dragged below the last one
     readonly property int gridRows: ControlCenterLayoutService.rowCount() + (editMode ? 1 : 0)
 
-    implicitWidth: 548
+    implicitWidth: ShellState.controlCenterWidth - 32
     implicitHeight: gridRows * cellH + Math.max(0, gridRows - 1) * gap
 
     // ---- Drag state (filled in by whichever tile is being dragged) ----
@@ -36,6 +36,10 @@ Item {
     // Same snapping maths the drop uses (see onReleased below and moveTile in the service)
     readonly property int dragTargetCol: Math.max(0, Math.min(columns - dragColSpan, Math.round(dragX / stepX)))
     readonly property int dragTargetRow: Math.max(0, Math.round(dragY / stepY))
+
+    // ---- Drag-out removal (edit mode): let a tile go outside the grid and it is removed ----
+    property bool dragOutside: false
+    readonly property real outsideMargin: 24
 
     focus: editMode
     Keys.onPressed: (event) => {
@@ -139,6 +143,8 @@ Item {
 
             // The dragged tile stays above the drop preview
             z: isDragged ? 20 : 0
+            // Dimmed while it is dragged outside the grid: letting go there removes it
+            opacity: (isDragged && root.dragOutside) ? 0.35 : 1.0
 
             onIsDraggedChanged: {
                 if (isDragged) {
@@ -149,6 +155,7 @@ Item {
                     root.dragTileId = tileId
                 } else if (root.dragTileId === tileId) {
                     root.dragTileId = ""
+                    root.dragOutside = false
                 }
             }
             onXChanged: if (isDragged) root.dragX = x
@@ -159,76 +166,38 @@ Item {
             width: colSpan * cellW + (colSpan - 1) * ControlCenterLayoutService.cellSpacing
             height: rowSpan * cellH + (rowSpan - 1) * ControlCenterLayoutService.cellSpacing
 
-            SpringAnimation {
-                id: xSpringAnim
-                spring: Motion.glideSpring
-                damping: Motion.glideDamping
-                mass: Motion.glideMass
-                epsilon: Motion.epsilon
-            }
-            NumberAnimation {
-                id: xEaseAnim
-                duration: ShellState.motionDuration(Motion.glideMs)
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: [0.15, 1.0, 0.05, 1.0, 1, 1]
-            }
+            // Moves and resizes use one ease, the curve the island shrinks with. No spring.
             Behavior on x {
                 enabled: !dragArea.drag.active
-                animation: (ShellState.motionSpringEnabled && !ShellState.motionReduced) ? xSpringAnim : xEaseAnim
-            }
-
-            SpringAnimation {
-                id: ySpringAnim
-                spring: Motion.glideSpring
-                damping: Motion.glideDamping
-                mass: Motion.glideMass
-                epsilon: Motion.epsilon
-            }
-            NumberAnimation {
-                id: yEaseAnim
-                duration: ShellState.motionDuration(Motion.glideMs)
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: [0.15, 1.0, 0.05, 1.0, 1, 1]
+                NumberAnimation {
+                    duration: ShellState.motionDuration(Motion.glideMs)
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: [0.15, 1.0, 0.05, 1.0, 1, 1]
+                }
             }
             Behavior on y {
                 enabled: !dragArea.drag.active
-                animation: (ShellState.motionSpringEnabled && !ShellState.motionReduced) ? ySpringAnim : yEaseAnim
-            }
-
-            SpringAnimation {
-                id: widthSpringAnim
-                spring: Motion.glideSpring
-                damping: Motion.glideDamping
-                mass: Motion.glideMass
-                epsilon: Motion.epsilon
-            }
-            NumberAnimation {
-                id: widthEaseAnim
-                duration: ShellState.motionDuration(Motion.glideMs)
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: [0.15, 1.0, 0.05, 1.0, 1, 1]
+                NumberAnimation {
+                    duration: ShellState.motionDuration(Motion.glideMs)
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: [0.15, 1.0, 0.05, 1.0, 1, 1]
+                }
             }
             Behavior on width {
                 enabled: !tileWrapper.resizing
-                animation: (ShellState.motionSpringEnabled && !ShellState.motionReduced) ? widthSpringAnim : widthEaseAnim
-            }
-
-            SpringAnimation {
-                id: heightSpringAnim
-                spring: Motion.glideSpring
-                damping: Motion.glideDamping
-                mass: Motion.glideMass
-                epsilon: Motion.epsilon
-            }
-            NumberAnimation {
-                id: heightEaseAnim
-                duration: ShellState.motionDuration(Motion.glideMs)
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: [0.15, 1.0, 0.05, 1.0, 1, 1]
+                NumberAnimation {
+                    duration: ShellState.motionDuration(Motion.glideMs)
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: [0.15, 1.0, 0.05, 1.0, 1, 1]
+                }
             }
             Behavior on height {
                 enabled: !tileWrapper.resizing
-                animation: (ShellState.motionSpringEnabled && !ShellState.motionReduced) ? heightSpringAnim : heightEaseAnim
+                NumberAnimation {
+                    duration: ShellState.motionDuration(Motion.glideMs)
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: [0.15, 1.0, 0.05, 1.0, 1, 1]
+                }
             }
 
             Loader {
@@ -288,7 +257,30 @@ Item {
                         root.forceActiveFocus()
                     }
 
+                    // Tracks whether the pointer has left the grid, so a drop there removes the tile.
+                    onPositionChanged: (mouse) => {
+                        if (!drag.active) return
+                        var p = dragArea.mapToItem(root, mouse.x, mouse.y)
+                        root.dragOutside = p.x < -root.outsideMargin || p.x > root.width + root.outsideMargin
+                            || p.y < -root.outsideMargin || p.y > root.height + root.outsideMargin
+                    }
+
                     onReleased: {
+                        if (root.dragOutside) {
+                            var removedId = tileWrapper.tileId
+                            root.dragOutside = false
+                            tileWrapper.x = Qt.binding(function() {
+                                return tileWrapper.col * (tileWrapper.cellW + ControlCenterLayoutService.cellSpacing)
+                            })
+                            tileWrapper.y = Qt.binding(function() {
+                                return tileWrapper.row * (tileWrapper.cellH + ControlCenterLayoutService.cellSpacing)
+                            })
+                            if (root.selectedTileId === removedId) root.selectedTileId = ""
+                            // Deferred: removing the tile destroys this handler's own item.
+                            Qt.callLater(function() { ControlCenterLayoutService.removeTile(removedId) })
+                            return
+                        }
+
                         var targetCol = Math.round(tileWrapper.x / (tileWrapper.cellW + ControlCenterLayoutService.cellSpacing))
                         var targetRow = Math.round(tileWrapper.y / (tileWrapper.cellH + ControlCenterLayoutService.cellSpacing))
                         ControlCenterLayoutService.moveTile(tileWrapper.tileId, targetCol, targetRow)
@@ -350,10 +342,10 @@ Item {
         }
     }
 
-    // ---- Drop preview: where the dragged tile will snap ----
+    // ---- Drop preview: where the dragged tile will snap (hidden while it is outside, about to be removed) ----
     Rectangle {
         id: ghost
-        visible: root.editMode && root.dragActive
+        visible: root.editMode && root.dragActive && !root.dragOutside
         z: 15
 
         x: root.dragTargetCol * root.stepX
